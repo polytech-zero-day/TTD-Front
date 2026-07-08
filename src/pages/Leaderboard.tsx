@@ -22,10 +22,10 @@ export default function Leaderboard() {
   const problemRanking = getProblemRanking(selectedProblemId);
 
   return (
-    <div className="w-[1920px] min-h-[1200px] bg-ebony font-sans">
+    <div className="w-full min-h-[1200px] bg-ebony font-sans">
       <Topbar active="leaderboard" userName={dummyUser.name} plan={dummyUser.plan} />
 
-      <main className="flex flex-col gap-5 w-[1160px] mx-auto px-10 pt-8 pb-20">
+      <main className="flex flex-col gap-5 w-full max-w-[1160px] mx-auto px-10 pt-8 pb-20">
         <h1 className="text-xl font-bold text-gallery">리더보드</h1>
         <Tabs
           items={[
