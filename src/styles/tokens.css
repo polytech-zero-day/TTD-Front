@@ -1,0 +1,26 @@
+/*
+ * Figma "TTD-TextToDevelop" 파일에서 1회 추출한 디자인 토큰.
+ * 출처: node 2:1794(TTD 문제 카탈로그), node 2:1985(TTD 인증 화면), 2026-07-08.
+ * 값 변경이 필요하면 임의 수정하지 말고 팀에 공유 후 재추출한다 (harness/figma.md 참고).
+ */
+@theme {
+  --color-mirage: #1c1b33; /* 카드/토프바 배경 */
+  --color-charade: #2a2c3b; /* 보조 배경 (칩·탭 비활성) */
+  --color-ebony: #14132b; /* input 배경 */
+  --color-biscay: #163a5a; /* nav 활성 배경 */
+  --color-chathams-blue: #134b70; /* 아바타 배경 */
+  --color-wedgewood: #508c9b; /* 버튼/강조 색상 */
+  --color-wedgewood-28: rgba(80, 140, 155, 0.28); /* L2 배지 배경 */
+  --color-breaker-bay-18: rgba(94, 150, 163, 0.18); /* 아이콘 배지 배경 */
+  --color-jungle-mist: #adccd4; /* plan-chip 텍스트 */
+  --color-santas-gray: #9a9ca8; /* 보조 텍스트 */
+  --color-gallery: #eeeeee; /* 다크 배경 위 기본 텍스트 */
+  --color-gallery-9: rgba(238, 238, 238, 0.09); /* 서브틀 보더 */
+
+  --font-family-sans: 'Roboto', system-ui, sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
