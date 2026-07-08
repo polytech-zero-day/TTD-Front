@@ -80,7 +80,7 @@ export default function MyPage() {
               <div className="text-lg font-semibold text-gallery">제출 이력</div>
               <Badge tone="neutral">최근 {dummyHistory.length}건</Badge>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-5">
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed px-5 pb-5">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>

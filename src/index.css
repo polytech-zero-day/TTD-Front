@@ -69,6 +69,25 @@ body {
   margin: 0;
 }
 
+.scrollbar-themed {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(238, 238, 238, 0.14) transparent;
+}
+.scrollbar-themed::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-themed::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb {
+  background: rgba(238, 238, 238, 0.14);
+  border-radius: 999px;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb:hover {
+  background: rgba(238, 238, 238, 0.24);
+}
+
 p {
   margin: 0;
 }
