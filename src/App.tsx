@@ -3,15 +3,16 @@ import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import ProblemListPage from './pages/ProblemListPage';
 import MyPage from './pages/MyPage';
 import Leaderboard from './pages/Leaderboard';
-
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/problems" element={<ProblemListPage />} />
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/mypage" element={<MyPage />} />
