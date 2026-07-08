@@ -10,3 +10,10 @@ export interface SignupInput {
   password: string;
   nickname: string;
 }
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresInSeconds: number;
+}

@@ -16,11 +16,7 @@
   --color-santas-gray: #9a9ca8; /* 보조 텍스트 */
   --color-gallery: #eeeeee; /* 다크 배경 위 기본 텍스트 */
   --color-gallery-9: rgba(238, 238, 238, 0.09); /* 서브틀 보더 */
+  --color-mirage-glow: #201e43; /* 인증 화면 배경 radial-gradient 중심색 */
 
-  --font-family-sans: 'Roboto', system-ui, sans-serif;
-
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+  --font-sans: 'Roboto', system-ui, sans-serif;
 }

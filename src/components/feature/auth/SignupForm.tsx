@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { signup } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
 import type { SignupInput } from '@/types/auth';
-
-interface SignupFormProps {
-  onSubmit: (input: SignupInput) => void;
-}
 
 function validate(input: SignupInput): string | null {
   if (!input.email.includes('@')) return '이메일 형식이 올바르지 않습니다.';
@@ -17,13 +16,15 @@ function validate(input: SignupInput): string | null {
   return null;
 }
 
-export default function SignupForm({ onSubmit }: SignupFormProps) {
+export default function SignupForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const input: SignupInput = { email, password, nickname };
     const validationError = validate(input);
@@ -31,8 +32,19 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       setError(validationError);
       return;
     }
+
     setError(null);
-    onSubmit(input);
+    setIsSubmitting(true);
+    try {
+      await signup(input);
+      navigate('/login');
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : '회원가입에 실패했습니다.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -68,8 +80,8 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       {error && (
         <p className="text-[12.3px] font-medium text-gallery">⚠ {error}</p>
       )}
-      <Button type="submit" className="w-full">
-        회원가입
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? '가입 중…' : '회원가입'}
       </Button>
     </form>
   );
