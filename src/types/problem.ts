@@ -49,6 +49,13 @@ export interface ProblemListItem extends ProblemSummary {
   attemptCount: number; // 목록 API 제안 필드 (미확정)
 }
 
+// S-03 상세 렌더링용 뷰 모델.
+// ProblemDetail(문서 7절)에 메타 표시용 attemptCount 를 더한 것.
+// attemptCount 는 목록과 동일한 "제안 필드"(미확정) — 상세 API 확정 시 재검토.
+export interface ProblemDetailView extends ProblemDetail {
+  attemptCount: number; // 목록 API 제안 필드 (미확정)
+}
+
 // ProblemType -> 배지/필터에 쓰는 한글 라벨.
 export const PROBLEM_TYPE_LABEL: Record<ProblemType, string> = {
   CLASSIFY: '분류·추출',
