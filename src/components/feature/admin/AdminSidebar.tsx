@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
+import { logout } from '@/lib/api/auth';
 
 interface AdminNavItem {
   to: string;
@@ -10,6 +11,13 @@ const NAV_ITEMS: AdminNavItem[] = [
 ];
 
 export default function AdminSidebar() {
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate('/login');
+  }
+
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-gallery-9 bg-mirage px-4 py-5">
       <div className="flex items-center gap-2 px-2 pb-6">
@@ -35,6 +43,13 @@ export default function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="mt-auto rounded-md px-3 py-2 text-left text-[13.5px] font-medium text-santas-gray hover:text-gallery"
+      >
+        로그아웃
+      </button>
     </aside>
   );
 }

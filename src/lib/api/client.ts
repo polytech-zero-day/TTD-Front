@@ -1,3 +1,5 @@
+import { getAccessToken } from '@/lib/auth/session';
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 
@@ -22,11 +24,12 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
+  const accessToken = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
-    credentials: 'include',
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...init.headers,
     },
   });

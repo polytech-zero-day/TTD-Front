@@ -30,7 +30,7 @@ export default function AuthPanel({ mode }: AuthPanelProps) {
   const { title, subtitle } = COPY[mode];
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-ebony">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[radial-gradient(circle_at_top,_var(--color-mirage-glow)_0%,_var(--color-ebony)_55%)]">
       <div className="flex w-[400px] flex-col items-center gap-[18px] p-5">
         <div className="flex items-center gap-[9px]">
           <span className="size-[11px] rounded-xs bg-wedgewood" />
@@ -49,17 +49,13 @@ export default function AuthPanel({ mode }: AuthPanelProps) {
             </div>
           </div>
 
-          <div>
+          <div className="flex w-full flex-col gap-1">
             <h1 className="text-[18px] leading-snug font-bold text-gallery">
               {title}
             </h1>
             <p className="text-[12.3px] text-santas-gray">{subtitle}</p>
 
-            {mode === 'login' ? (
-              <LoginForm onSubmit={() => {}} />
-            ) : (
-              <SignupForm onSubmit={() => {}} />
-            )}
+            {mode === 'login' ? <LoginForm /> : <SignupForm />}
           </div>
         </div>
 

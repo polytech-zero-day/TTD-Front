@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { login } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
 import type { LoginInput } from '@/types/auth';
-
-interface LoginFormProps {
-  onSubmit: (input: LoginInput) => void;
-}
 
 function validate(input: LoginInput): string | null {
   if (!input.email.includes('@')) return '이메일 형식이 올바르지 않습니다.';
@@ -14,12 +13,14 @@ function validate(input: LoginInput): string | null {
   return null;
 }
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
+export default function LoginForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const input: LoginInput = { email, password };
     const validationError = validate(input);
@@ -27,8 +28,19 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       setError(validationError);
       return;
     }
+
     setError(null);
-    onSubmit(input);
+    setIsSubmitting(true);
+    try {
+      await login(input);
+      navigate('/');
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : '로그인에 실패했습니다.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -53,8 +65,8 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       {error && (
         <p className="text-[12.3px] font-medium text-gallery">⚠ {error}</p>
       )}
-      <Button type="submit" className="w-full">
-        로그인
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? '로그인 중…' : '로그인'}
       </Button>
     </form>
   );
