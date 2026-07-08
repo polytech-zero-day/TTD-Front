@@ -80,17 +80,35 @@ export default function Leaderboard() {
                 </div>
               </div>
               {/* TODO: 백엔드 연동 후 실제 문제 목록/문제별 랭킹 API로 교체 */}
-              <select
-                value={selectedProblemId}
-                onChange={(e) => setSelectedProblemId(e.target.value)}
-                className="bg-ebony border border-gallery-9 text-gallery text-sm rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-wedgewood"
-              >
-                {dummyProblems.map((p) => (
-                  <option key={p.id} value={p.id} className="bg-mirage text-gallery">
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedProblemId}
+                  onChange={(e) => setSelectedProblemId(e.target.value)}
+                  className="appearance-none bg-ebony border border-gallery-9 text-gallery text-sm rounded-md pl-3 pr-10 py-2 cursor-pointer focus:outline-none focus:border-wedgewood"
+                >
+                  {dummyProblems.map((p) => (
+                    <option key={p.id} value={p.id} className="bg-mirage text-gallery">
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 1L6 6L11 1"
+                    stroke="#9a9ca8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
               <RankingTable entries={problemRanking} />
