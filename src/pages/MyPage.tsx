@@ -13,10 +13,10 @@ import {
 
 export default function MyPage() {
   return (
-    <div className="w-[1920px] min-h-[1200px] bg-ebony font-sans">
+    <div className="w-full min-h-[1200px] bg-ebony font-sans">
       <Topbar active="mypage" userName={dummyUser.name} plan={dummyUser.plan} />
 
-      <main className="flex flex-col gap-[22px] w-[1160px] mx-auto px-5 pt-8 pb-20">
+      <main className="flex flex-col gap-[22px] w-full max-w-[1160px] mx-auto px-5 pt-8 pb-20">
         {/* 프로필 패널 */}
         <section className="flex items-center gap-[18px] p-[22px] bg-mirage border border-gallery-9 shadow-[0_1px_2px_rgba(0,0,0,0.28)] rounded-xl">
           <Avatar initial={dummyUser.name.charAt(0)} size="lg" />
