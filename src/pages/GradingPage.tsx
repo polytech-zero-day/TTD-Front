@@ -19,11 +19,11 @@ export default function GradingPage() {
     <div className="w-full min-h-screen bg-ebony font-sans flex items-center justify-center px-5">
       <div className="flex flex-col items-center gap-[21px] w-full max-w-[480px]">
         {/* 완료 아이콘 */}
-        <div className="w-[88px] h-[88px] rounded-full bg-wedgewood/[0.12] flex items-center justify-center">
+        <div className="w-[88px] h-[88px] rounded-full bg-wedgewood/[0.12] flex items-center justify-center text-wedgewood">
           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M20 6L9 17l-5-5"
-              stroke="#508C9B"
+              stroke="currentColor"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -32,7 +32,7 @@ export default function GradingPage() {
         </div>
 
         {/* 타이틀 */}
-        <h1 className="text-[32px] font-semibold text-white text-center leading-tight">
+        <h1 className="text-[32px] font-semibold text-gallery text-center leading-tight">
           제출이 완료되었습니다
         </h1>
         <p className="text-sm text-santas-gray text-center -mt-3">
