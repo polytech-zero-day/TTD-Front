@@ -92,8 +92,17 @@ export default function ChatPanel({
           )}
 
           {phase === 'waiting' && (
-            <div className="mr-16 self-start rounded-xl bg-charade px-4 py-3 text-sm text-santas-gray">
-              ● ● ●&nbsp; 응답 생성중…
+            <div className="mr-16 flex items-center gap-1.5 self-start rounded-xl bg-charade px-4 py-3">
+              {[0, 150, 300].map((delay) => (
+                <span
+                  key={delay}
+                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-santas-gray"
+                  style={{ animationDelay: `${delay}ms` }}
+                />
+              ))}
+              <span className="ml-1.5 text-sm text-santas-gray">
+                응답 생성중
+              </span>
             </div>
           )}
 
