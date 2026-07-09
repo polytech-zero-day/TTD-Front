@@ -85,36 +85,18 @@ export default function Leaderboard() {
                 </div>
               </div>
               {/* TODO: 백엔드 연동 후 실제 문제 목록/문제별 랭킹 API로 교체 */}
-              <div className="relative">
-                <Select
-                  variant="form"
-                  className="w-56"
-                  value={selectedProblemId}
-                  onChange={(e) => setSelectedProblemId(e.target.value)}
-                >
-                  {dummyProblems.map((p) => (
-                    <option key={p.id} value={p.id} className="bg-mirage text-gallery">
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
-                <svg
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  width="12"
-                  height="8"
-                  viewBox="0 0 12 8"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M1 1L6 6L11 1"
-                    stroke="#9a9ca8"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+              <Select
+                variant="form"
+                className="w-56"
+                value={selectedProblemId}
+                onChange={(e) => setSelectedProblemId(e.target.value)}
+              >
+                {dummyProblems.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-mirage text-gallery">
+                    {p.name}
+                  </option>
+                ))}
+              </Select>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
               <RankingTable entries={problemRanking} />
