@@ -1,7 +1,6 @@
 // src/components/feature/attempt/ProblemPanel.tsx
 import Badge from '@/components/ui/Badge';
-import { PROBLEM_TYPE_LABEL } from '@/types/problem';
-import type { ProblemDetailView } from '@/types/problem';
+import { PROBLEM_TYPE_LABEL, type ProblemDetail } from '@/types/problem';
 
 function Section({
   label,
@@ -33,11 +32,7 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
-export default function ProblemPanel({
-  problem,
-}: {
-  problem: ProblemDetailView;
-}) {
+export default function ProblemPanel({ problem }: { problem: ProblemDetail }) {
   return (
     <section className="h-full min-w-0 overflow-auto px-7 py-6">
       <h1 className="text-[22px] font-bold text-gallery">{problem.title}</h1>
