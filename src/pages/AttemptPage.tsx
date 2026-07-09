@@ -16,8 +16,15 @@ export default function AttemptPage() {
 
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
 
-  const { state, send, openConfirm, cancelConfirm, confirmSubmit, setDraft } =
-    useAttempt(problemId, () => navigate(`/problems/${problemId}/report`));
+  const {
+    state,
+    send,
+    openConfirm,
+    cancelConfirm,
+    confirmSubmit,
+    setDraft,
+    retryGrading,
+  } = useAttempt(problemId, () => navigate(`/problems/${problemId}/report`));
 
   useEffect(() => {
     // 존재하지 않거나 비활성 문제(404)면 카탈로그로 돌려보낸다
@@ -50,6 +57,7 @@ export default function AttemptPage() {
           onSend={send}
           onCancelConfirm={cancelConfirm}
           onConfirmSubmit={confirmSubmit}
+          onRegrade={retryGrading}
         />
         <SubmitPanel
           state={state}

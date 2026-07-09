@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAttempt } from './useAttempt';
 import {
   getAttemptResult,
+  regradeAttempt,
   saveDraft,
   sendAttemptMessage,
   startAttempt,
@@ -16,6 +17,7 @@ vi.mock('@/lib/api/attempt', () => ({
   saveDraft: vi.fn(),
   submitAttempt: vi.fn(),
   getAttemptResult: vi.fn(),
+  regradeAttempt: vi.fn(),
 }));
 
 const startAttemptMock = vi.mocked(startAttempt);
@@ -23,6 +25,7 @@ const sendMessageMock = vi.mocked(sendAttemptMessage);
 const saveDraftMock = vi.mocked(saveDraft);
 const submitMock = vi.mocked(submitAttempt);
 const getResultMock = vi.mocked(getAttemptResult);
+const regradeMock = vi.mocked(regradeAttempt);
 
 const snapshot: AttemptSnapshot = {
   attemptId: 7,
@@ -172,5 +175,85 @@ describe('useAttempt', () => {
       await vi.advanceTimersByTimeAsync(2000);
     });
     expect(saveDraftMock).toHaveBeenCalledWith(7, '작성 중인 답안');
+  });
+
+  it('폴링이 GRADING_FAILED를 받으면 폴링을 멈추고 실패 상태로 전환한다', async () => {
+    vi.useFakeTimers();
+    saveDraftMock.mockResolvedValue(undefined);
+    submitMock.mockResolvedValue({
+      attemptId: 7, status: 'GRADING',
+      rubricScore: null, efficiencyScore: null, feedback: null,
+    });
+    getResultMock.mockResolvedValue({
+      attemptId: 7, status: 'GRADING_FAILED',
+      rubricScore: null, efficiencyScore: null, feedback: null,
+    });
+    const onGraded = vi.fn();
+    const { result } = renderHook(() => useAttempt(1, onGraded));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await result.current.confirmSubmit();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000); // 첫 폴링에서 실패 확인
+    });
+
+    expect(result.current.state.phase).toBe('failed');
+    expect(onGraded).not.toHaveBeenCalled();
+
+    const callsAfterFail = getResultMock.mock.calls.length;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(9000); // 폴링이 멈췄는지 확인
+    });
+    expect(getResultMock.mock.calls.length).toBe(callsAfterFail);
+  });
+
+  it('재채점 요청이 성공하면 다시 채점 폴링으로 돌아가 GRADED 시 onGraded를 호출한다', async () => {
+    vi.useFakeTimers();
+    startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING_FAILED' });
+    regradeMock.mockResolvedValue({
+      attemptId: 7, status: 'GRADING',
+      rubricScore: null, efficiencyScore: null, feedback: null,
+    });
+    getResultMock.mockResolvedValue({
+      attemptId: 7, status: 'GRADED',
+      rubricScore: 88, efficiencyScore: 100, feedback: '복구 완료',
+    });
+    const onGraded = vi.fn();
+    const { result } = renderHook(() => useAttempt(1, onGraded));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(result.current.state.phase).toBe('failed'); // 재진입 시 실패 상태 복원
+
+    await act(async () => {
+      await result.current.retryGrading();
+    });
+    expect(regradeMock).toHaveBeenCalledWith(7);
+    expect(result.current.state.phase).toBe('grading');
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(onGraded).toHaveBeenCalledTimes(1);
+  });
+
+  it('재채점 요청이 실패하면 실패 상태를 유지한다', async () => {
+    vi.useFakeTimers();
+    startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING_FAILED' });
+    regradeMock.mockRejectedValue(new Error('server error'));
+    const { result } = renderHook(() => useAttempt(1, vi.fn()));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await result.current.retryGrading();
+    });
+
+    expect(result.current.state.phase).toBe('failed');
   });
 });
