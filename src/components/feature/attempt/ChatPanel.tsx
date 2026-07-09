@@ -49,8 +49,9 @@ export default function ChatPanel({
         <Badge tone="neutral">기본 모델</Badge>
       </div>
       <div className="flex shrink-0 items-center gap-2 px-5 py-2.5">
+        {/* 실제 호출 모델은 백엔드 AI_MODEL 설정. 표기가 어긋나지 않게 변경 시 함께 수정할 것 */}
         <Select disabled className="flex-1">
-          <option>Claude 3 Haiku (기본)</option>
+          <option>GPT-5.4 mini (기본)</option>
         </Select>
         <span className="rounded-md bg-[rgba(217,164,65,0.16)] px-2.5 py-1 text-[11px] font-semibold text-[#d9a441]">
           PRO 모델 잠금
