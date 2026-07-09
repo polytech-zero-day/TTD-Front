@@ -63,29 +63,23 @@ export default function Leaderboard() {
         </section>
 
         {activeTab === 'overall' ? (
-          <div className="flex max-h-[821px] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+          <div className="flex flex-col max-h-[821px] overflow-hidden bg-mirage border border-gallery-9 shadow-[0_1px_2px_rgba(0,0,0,0.28)] rounded-xl">
             <div className="flex items-center p-5">
               <div>
-                <div className="text-[14.6px] font-semibold text-gallery">
-                  전체 랭킹
-                </div>
-                <div className="mt-1 text-xs text-santas-gray">
-                  품질·효율 종합 점수 기준
-                </div>
+                <div className="text-[14.6px] font-semibold text-gallery">전체 랭킹</div>
+                <div className="text-xs text-santas-gray mt-1">품질·효율 종합 점수 기준</div>
               </div>
             </div>
-            <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
               <RankingTable entries={dummyOverallRanking} />
             </div>
           </div>
         ) : (
-          <div className="flex max-h-[821px] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
-            <div className="flex items-center justify-between gap-4 p-5">
+          <div className="flex flex-col max-h-[821px] overflow-hidden bg-mirage border border-gallery-9 shadow-[0_1px_2px_rgba(0,0,0,0.28)] rounded-xl">
+            <div className="flex items-center justify-between p-5 gap-4">
               <div>
-                <div className="text-[14.6px] font-semibold text-gallery">
-                  문제별 랭킹
-                </div>
-                <div className="mt-1 text-xs text-santas-gray">
+                <div className="text-[14.6px] font-semibold text-gallery">문제별 랭킹</div>
+                <div className="text-xs text-santas-gray mt-1">
                   선택한 문제 기준 상위 랭킹
                 </div>
               </div>
@@ -94,20 +88,16 @@ export default function Leaderboard() {
                 <select
                   value={selectedProblemId}
                   onChange={(e) => setSelectedProblemId(e.target.value)}
-                  className="cursor-pointer appearance-none rounded-md border border-gallery-9 bg-ebony py-2 pr-10 pl-3 text-sm text-gallery focus:border-wedgewood focus:outline-none"
+                  className="appearance-none bg-ebony border border-gallery-9 text-gallery text-sm rounded-md pl-3 pr-10 py-2 cursor-pointer focus:outline-none focus:border-wedgewood"
                 >
                   {dummyProblems.map((p) => (
-                    <option
-                      key={p.id}
-                      value={p.id}
-                      className="bg-mirage text-gallery"
-                    >
+                    <option key={p.id} value={p.id} className="bg-mirage text-gallery">
                       {p.name}
                     </option>
                   ))}
                 </select>
                 <svg
-                  className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   width="12"
                   height="8"
                   viewBox="0 0 12 8"
@@ -124,7 +114,7 @@ export default function Leaderboard() {
                 </svg>
               </div>
             </div>
-            <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
               <RankingTable entries={problemRanking} />
             </div>
           </div>

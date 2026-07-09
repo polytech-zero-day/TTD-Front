@@ -6,10 +6,18 @@ interface StatCardProps {
   valueSuffix?: string;
 }
 
-export default function StatCard({ label, value, sub, accent = false, valueSuffix }: StatCardProps) {
+export default function StatCard({
+  label,
+  value,
+  sub,
+  accent = false,
+  valueSuffix,
+}: StatCardProps) {
   return (
-    <div className="flex flex-col items-center gap-1.5 flex-1 p-5 bg-mirage border border-gallery-9 rounded-xl">
-      <div className="text-sm font-medium text-santas-gray text-center">{label}</div>
+    <div className="flex flex-1 flex-col items-center gap-1.5 rounded-xl border border-gallery-9 bg-mirage p-5">
+      <div className="text-center text-sm font-medium text-santas-gray">
+        {label}
+      </div>
       <div className="flex items-baseline gap-1">
         <span
           className={`text-[32px] font-bold tracking-[-0.64px] ${
@@ -18,9 +26,13 @@ export default function StatCard({ label, value, sub, accent = false, valueSuffi
         >
           {value}
         </span>
-        {valueSuffix && <span className="text-base font-bold text-santas-gray">{valueSuffix}</span>}
+        {valueSuffix && (
+          <span className="text-base font-bold text-santas-gray">
+            {valueSuffix}
+          </span>
+        )}
       </div>
-      <div className="text-xs text-santas-gray text-center mt-1.5">{sub}</div>
+      <div className="mt-1.5 text-center text-xs text-santas-gray">{sub}</div>
     </div>
   );
 }

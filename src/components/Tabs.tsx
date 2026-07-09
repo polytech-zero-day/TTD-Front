@@ -17,8 +17,10 @@ export default function Tabs({ items, active, onChange }: TabsProps) {
           key={item.key}
           type="button"
           onClick={() => onChange(item.key)}
-          className={`bg-transparent border-0 border-b-2 -mb-px px-0.5 py-3 font-sans font-medium text-base cursor-pointer ${
-            active === item.key ? 'text-gallery border-wedgewood' : 'text-santas-gray border-transparent'
+          className={`-mb-px cursor-pointer border-0 border-b-2 bg-transparent px-0.5 py-3 font-sans text-base font-medium ${
+            active === item.key
+              ? 'border-wedgewood text-gallery'
+              : 'border-transparent text-santas-gray'
           }`}
         >
           {item.label}
