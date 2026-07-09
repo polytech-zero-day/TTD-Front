@@ -55,7 +55,7 @@ function ProblemDetail({ problem }: { problem: ProblemDetailView }) {
   const chip = SOURCE_TYPE_CHIP[sourceType];
 
   return (
-    <main className="mx-auto flex w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
+    <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
       {/* 뒤로가기 */}
       <a
         href="/problems"
@@ -141,7 +141,7 @@ function ProblemDetail({ problem }: { problem: ProblemDetailView }) {
 // 없는 문제 id 처리 (PROBLEM_NOT_FOUND).
 function NotFound() {
   return (
-    <main className="mx-auto flex w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
+    <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
       <a
         href="/problems"
         className="text-sm text-santas-gray no-underline hover:text-gallery"
@@ -172,7 +172,7 @@ export default function ProblemDetailPage() {
   const problem = id ? dummyProblemDetails[Number(id)] : undefined;
 
   return (
-    <div className="min-h-[1200px] w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar
         active="catalog"
         userName={dummyViewer.name}
