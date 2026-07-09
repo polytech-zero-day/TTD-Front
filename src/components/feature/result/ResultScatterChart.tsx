@@ -1,4 +1,4 @@
-import type { ScatterDot } from '../data/dummyResult';
+import type { ScatterDot } from '@/data/dummyResult';
 
 interface ResultScatterChartProps {
   dots: ScatterDot[];
@@ -9,17 +9,19 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
     <div className="flex flex-col gap-3">
       <div className="flex gap-2">
         {/* Y축 라벨 (세로) */}
-        <div className="flex items-center justify-center w-4">
-          <span className="text-sm font-semibold text-santas-gray [writing-mode:vertical-rl] rotate-180">
+        <div className="flex w-6 items-center justify-center">
+          <span className="-rotate-90 whitespace-nowrap text-sm font-semibold text-santas-gray">
             품질점수
           </span>
         </div>
 
         <div className="relative flex-1 aspect-square bg-ebony border border-gallery-9 rounded-lg overflow-hidden">
           {dots.map((dot, index) => {
-            let dotClass = 'w-3 h-3 rounded-full bg-wedgewood/30';
-            if (dot.isTopTen) dotClass = 'w-3 h-3 rounded-full bg-success';
-            if (dot.isCurrentPosition) dotClass = 'w-3 h-3 rounded-full border-2 border-wedgewood bg-transparent';
+            let dotClass = 'w-2 h-2 rounded-full bg-wedgewood/25';
+            if (dot.isTopTen) dotClass = 'w-2.5 h-2.5 rounded-full bg-success/60';
+            if (dot.isCurrentPosition)
+              dotClass =
+                'w-5 h-5 rounded-full bg-wedgewood border-2 border-white z-10 shadow-[0_0_0_5px_rgba(80,140,155,0.35)]';
 
             return (
               <div
@@ -32,23 +34,27 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
         </div>
       </div>
 
-      <div className="pl-6 text-center">
-        <span className="text-sm font-semibold text-santas-gray">효율성점수</span>
+      {/* X축 라벨 (스캐터 폭과 정렬) */}
+      <div className="flex gap-2">
+        <div className="w-6 flex-none" />
+        <div className="flex-1 text-center">
+          <span className="text-sm font-semibold text-santas-gray">효율성점수</span>
+        </div>
       </div>
 
       {/* 범례 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-wedgewood/30" />
+          <span className="w-2 h-2 rounded-full bg-wedgewood/25" />
           <span className="text-xs text-gallery">다른 사용자</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full border-2 border-wedgewood" />
-          <span className="text-xs text-gallery">현재 위치</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-success/60" />
+          <span className="text-xs text-gallery">상위 10%</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-success" />
-          <span className="text-xs text-gallery">상위 10%</span>
+          <span className="w-3.5 h-3.5 rounded-full bg-wedgewood border-2 border-white shadow-[0_0_0_3px_rgba(80,140,155,0.35)]" />
+          <span className="text-xs text-gallery">내 위치</span>
         </div>
       </div>
     </div>
