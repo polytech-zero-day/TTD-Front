@@ -85,3 +85,64 @@ export const TYPE_FILTERS: TypeFilter[] = [
   { label: '분석 보고서', match: (t) => t === 'REPORT' },
   { label: '스켈레톤 개선', match: (t) => t.startsWith('SKELETON_') },
 ];
+
+// SourceType -> 한글 라벨.
+export const SOURCE_TYPE_LABEL: Record<SourceType, string> = {
+  AUTO_GRADED: '자동 채점',
+  RUBRIC_ONLY: '루브릭 채점',
+};
+
+// ProblemStatus -> 한글 라벨.
+export const PROBLEM_STATUS_LABEL: Record<ProblemStatus, string> = {
+  draft: '초안',
+  pending: '검토 대기',
+  active: '게시됨',
+};
+
+// GET/POST/PUT /api/admin/problems 응답. (docs/openapi.yaml AdminProblemResponse)
+export interface AdminProblem {
+  id: number;
+  title: string;
+  difficulty: Difficulty;
+  type: ProblemType;
+  maxAttempts: number;
+  sourceType: SourceType;
+  description: string;
+  requirements: string[];
+  constraints: string[];
+  skeletonCode: string | null;
+  status: ProblemStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// POST /api/admin/problems 요청 바디. maxAttempts는 생성 시 선택.
+export interface CreateProblemInput {
+  title: string;
+  difficulty: Difficulty;
+  type: ProblemType;
+  sourceType: SourceType;
+  description: string;
+  requirements: string[];
+  constraints: string[];
+  skeletonCode?: string;
+  maxAttempts?: number;
+}
+
+// PUT /api/admin/problems/{id} 요청 바디. maxAttempts는 수정 시 필수.
+export interface UpdateProblemInput {
+  title: string;
+  difficulty: Difficulty;
+  type: ProblemType;
+  sourceType: SourceType;
+  description: string;
+  requirements: string[];
+  constraints: string[];
+  skeletonCode?: string;
+  maxAttempts: number;
+}
+
+// PATCH /api/admin/problems/{id}/status 요청 바디.
+export interface UpdateProblemStatusInput {
+  status: ProblemStatus;
+}
