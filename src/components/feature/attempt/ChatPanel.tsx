@@ -231,8 +231,9 @@ export default function ChatPanel({
           </Button>
         </div>
 
+        {/* 바깥 여백은 mt-2로 고정, 배지 내부 여백은 px/py로 분리 (pt-2가 배지 패딩과 충돌하던 문제) */}
         <p
-          className={`pt-2 text-xs ${exhausted ? 'inline-block rounded-md border border-success/40 bg-success-bg px-2 py-1 text-success' : 'text-santas-gray/70'}`}
+          className={`mt-2 text-xs ${exhausted ? 'inline-block rounded-md border border-success/40 bg-success-bg px-3 py-1.5 text-success' : 'text-santas-gray/70'}`}
         >
           {exhausted
             ? '대화 이력을 참고해 우측 패널에서 최종 결과물을 작성·제출할 수 있습니다'
