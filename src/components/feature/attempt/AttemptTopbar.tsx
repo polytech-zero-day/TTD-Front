@@ -27,7 +27,7 @@ export default function AttemptTopbar({
         <span className="rounded-md bg-charade px-2.5 py-1 text-xs text-santas-gray">
           메시지 {usage.messagesUsed} / {usage.messagesLimit}
         </span>
-        <span className="rounded-md bg-gallery px-2.5 py-1 text-[13px] font-bold text-mirage tabular-nums">
+        <span className="rounded-md bg-charade px-2.5 py-1 text-[13px] font-bold text-gallery tabular-nums">
           {formatTime(remainingSeconds)}
         </span>
         <button
