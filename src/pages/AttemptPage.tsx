@@ -43,7 +43,7 @@ export default function AttemptPage() {
         remainingSeconds={state.remainingSeconds}
         onExit={() => navigate(`/problems/${problemId}`)}
       />
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(360px,1.15fr)_minmax(420px,1fr)_minmax(300px,0.7fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,0.9fr)_minmax(520px,1.5fr)_minmax(300px,0.8fr)] overflow-hidden">
         <ProblemPanel problem={problem} />
         <ChatPanel
           state={state}

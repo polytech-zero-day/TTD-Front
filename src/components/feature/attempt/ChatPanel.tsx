@@ -43,7 +43,7 @@ export default function ChatPanel({
   }
 
   return (
-    <section className="flex h-full min-w-0 flex-col overflow-auto border-x border-gallery-9">
+    <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-x border-gallery-9">
       <div className="flex shrink-0 items-center justify-between border-b border-gallery-9 px-5 py-3">
         <span className="text-sm font-semibold text-gallery">AI 채팅</span>
         <Badge tone="neutral">기본 모델</Badge>
