@@ -17,6 +17,7 @@ interface Props {
   onSend: (content: string) => void;
   onCancelConfirm: () => void;
   onConfirmSubmit: () => void;
+  onRegrade: () => void;
 }
 
 function placeholderFor(state: AttemptState) {
@@ -31,6 +32,7 @@ export default function ChatPanel({
   onSend,
   onCancelConfirm,
   onConfirmSubmit,
+  onRegrade,
 }: Props) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -112,6 +114,7 @@ export default function ChatPanel({
           )}
 
           {phase === 'grading' && <GradingCard />}
+          {phase === 'failed' && <GradingFailedCard onRegrade={onRegrade} />}
         </div>
       </div>
 
@@ -371,6 +374,33 @@ function GradingCard() {
             새로고침하거나 관리자에게 문의해 주세요.
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+// 채점 실패 모달. 제출물은 서버에 보존되어 있으며 재채점으로 복구할 수 있다.
+function GradingFailedCard({ onRegrade }: { onRegrade: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="flex w-[360px] flex-col items-center gap-3 rounded-xl bg-mirage p-6 text-center shadow-2xl"
+      >
+        <h3 className="text-base font-bold text-[#e2574c]">
+          채점에 실패했습니다
+        </h3>
+        <p className="text-[13px] leading-relaxed text-santas-gray">
+          제출한 결과물과 대화 이력은 안전하게 저장되어 있어요. 아래 버튼으로
+          다시 채점을 요청할 수 있습니다.
+        </p>
+        <Button size="sm" onClick={onRegrade}>
+          다시 채점 요청
+        </Button>
+        <p className="text-xs text-santas-gray/70">
+          반복해서 실패하면 관리자에게 문의해 주세요.
+        </p>
       </div>
     </div>
   );

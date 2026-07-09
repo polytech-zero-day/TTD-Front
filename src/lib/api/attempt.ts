@@ -54,3 +54,9 @@ export const submitAttempt = (attemptId: number) =>
 // 채점 완료 폴링용
 export const getAttemptResult = (attemptId: number) =>
   apiFetch<AttemptResult>(`/api/attempts/${attemptId}/result`);
+
+// 재채점 요청 — 채점 실패(GRADING_FAILED) 상태에서만 허용
+export const regradeAttempt = (attemptId: number) =>
+  apiFetch<AttemptResult>(`/api/attempts/${attemptId}/regrade`, {
+    method: 'POST',
+  });

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getAttemptResult,
+  regradeAttempt,
   saveDraft,
   sendAttemptMessage,
   startAttempt,
@@ -41,6 +42,10 @@ export function useAttempt(problemId: number, onGraded: () => void) {
           if (result.status === 'GRADED') {
             clearInterval(pollTimerRef.current);
             onGraded();
+          } else if (result.status === 'GRADING_FAILED') {
+            // 채점 실패 확정 — 폴링을 멈추고 재채점 UI로 전환
+            clearInterval(pollTimerRef.current);
+            setState((s) => ({ ...s, phase: 'failed' }));
           }
         } catch {
           /* 일시 오류는 다음 폴링에서 재시도 */
@@ -55,6 +60,11 @@ export function useAttempt(problemId: number, onGraded: () => void) {
     if (startedRef.current) return;
     startedRef.current = true;
     startAttempt(problemId).then((snap) => {
+      if (snap.status === 'GRADING_FAILED') {
+        // 재진입했는데 채점 실패 상태면 바로 재채점 UI로
+        setState((s) => ({ ...s, attemptId: snap.attemptId, phase: 'failed' }));
+        return;
+      }
       if (snap.status !== 'IN_PROGRESS') {
         // 재진입했는데 이미 제출된 세션이면 바로 채점 폴링으로
         setState((s) => ({ ...s, attemptId: snap.attemptId }));
@@ -168,5 +178,25 @@ export function useAttempt(problemId: number, onGraded: () => void) {
     beginResultPolling(state.attemptId);
   }, [state.attemptId, state.draft, beginResultPolling]);
 
-  return { state, send, openConfirm, cancelConfirm, confirmSubmit, setDraft };
+  // 채점 실패 상태에서 재채점 요청 — 성공하면 다시 채점 폴링으로
+  const retryGrading = useCallback(async () => {
+    const attemptId = state.attemptId;
+    if (!attemptId || state.phase !== 'failed') return;
+    try {
+      await regradeAttempt(attemptId);
+      beginResultPolling(attemptId);
+    } catch {
+      /* 실패 상태 유지 — 사용자가 다시 시도하거나 관리자 문의 */
+    }
+  }, [state.attemptId, state.phase, beginResultPolling]);
+
+  return {
+    state,
+    send,
+    openConfirm,
+    cancelConfirm,
+    confirmSubmit,
+    setDraft,
+    retryGrading,
+  };
 }

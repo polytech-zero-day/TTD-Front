@@ -15,7 +15,8 @@ interface Props {
 }
 
 export default function SubmitPanel({ state, onDraftChange, onSubmit }: Props) {
-  const locked = state.phase === 'grading';
+  // 제출 이후(채점 중·채점 실패)에는 결과물이 서버에 확정된 상태라 수정 불가
+  const locked = state.phase === 'grading' || state.phase === 'failed';
   return (
     <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <div className="shrink-0 border-b border-gallery-9 px-5 py-3">

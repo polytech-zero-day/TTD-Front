@@ -1,7 +1,8 @@
 export type AttemptPhase =
-  'loading' | 'chatting' | 'waiting' | 'confirming' | 'grading';
+  'loading' | 'chatting' | 'waiting' | 'confirming' | 'grading' | 'failed';
 
-export type AttemptStatus = 'IN_PROGRESS' | 'GRADING' | 'GRADED';
+export type AttemptStatus =
+  'IN_PROGRESS' | 'GRADING' | 'GRADING_FAILED' | 'GRADED';
 
 export interface ChatMessage {
   id: number | string; // 서버는 number, 낙관적 렌더링용 임시 메시지는 string
