@@ -54,7 +54,7 @@ export default function ProblemListPage() {
   }, [level, typeLabel]);
 
   return (
-    <div className="min-h-screen w-full bg-ebony font-sans">
+    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
       <Topbar
         active="catalog"
         userName={dummyViewer.name}
