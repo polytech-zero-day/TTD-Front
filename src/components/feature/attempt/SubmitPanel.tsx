@@ -1,3 +1,5 @@
+import CodeEditor from '@uiw/react-textarea-code-editor';
+import '@uiw/react-textarea-code-editor/dist.css';
 import Button from '@/components/ui/Button';
 import type { AttemptState } from '@/types/attempt';
 
@@ -15,20 +17,32 @@ interface Props {
 export default function SubmitPanel({ state, onDraftChange, onSubmit }: Props) {
   const locked = state.phase === 'grading';
   return (
-    <section className="flex h-full min-w-0 flex-col overflow-auto">
+    <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <div className="shrink-0 border-b border-gallery-9 px-5 py-3">
         <span className="text-sm font-semibold text-gallery">결과물 제출</span>
       </div>
 
-      <textarea
-        value={state.draft}
-        onChange={(e) => onDraftChange(e.target.value)}
-        disabled={locked}
-        placeholder={DRAFT_PLACEHOLDER}
-        className="min-h-0 flex-1 resize-none bg-transparent px-5 py-4 font-mono text-[13px] leading-relaxed text-gallery placeholder:text-santas-gray/50 focus:outline-none disabled:opacity-60"
-      />
+      {/* 코드 하이라이트 지원 에디터. 결과물이 텍스트여도 무해하고 코드면 색이 입혀진다 */}
+      <div
+        data-color-mode="dark"
+        className="min-h-0 flex-1 overflow-y-auto [&_.w-tc-editor]:min-h-full [&_.w-tc-editor]:!bg-transparent"
+      >
+        <CodeEditor
+          value={state.draft}
+          language="python"
+          placeholder={DRAFT_PLACEHOLDER}
+          onChange={(e) => onDraftChange(e.target.value)}
+          disabled={locked}
+          padding={20}
+          style={{
+            fontFamily: 'ui-monospace, Consolas, monospace',
+            fontSize: 13,
+            lineHeight: 1.6,
+          }}
+        />
+      </div>
 
-      <div className="flex shrink-0 flex-col gap-2.5 px-5 pb-5">
+      <div className="flex shrink-0 flex-col gap-2.5 px-5 pt-3 pb-5">
         <p className="rounded-lg border border-[#3d5a9e]/50 bg-biscay/30 px-3.5 py-2.5 text-xs text-gallery">
           ⚠ 제출은 1회 확정이며 이후 대화도 잠깁니다.
         </p>
