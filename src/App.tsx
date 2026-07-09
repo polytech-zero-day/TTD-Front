@@ -9,6 +9,7 @@ import ProblemListPage from './pages/ProblemListPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import MyPage from './pages/MyPage';
 import Leaderboard from './pages/Leaderboard';
+import AttemptPage from './pages/AttemptPage';
 
 export default function App() {
   return (
@@ -26,6 +27,8 @@ export default function App() {
           <Route path="users" element={<UserManagementPage />} />
           <Route path="problems" element={<ProblemManagementPage />} />
         </Route>
+        <Route path="/problems/:id" element={<ProblemDetailPage />} />
+        <Route path="/problems/:id/attempt" element={<AttemptPage />} />{' '}
       </Routes>
     </BrowserRouter>
   );
