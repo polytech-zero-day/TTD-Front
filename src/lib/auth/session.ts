@@ -1,3 +1,5 @@
+import { decodeJwtRole } from '@/lib/auth/jwt';
+import type { UserRole } from '@/types/admin';
 import type { TokenResponse } from '@/types/auth';
 
 /*
@@ -25,4 +27,8 @@ export function getRefreshToken(): string | null {
 
 export function isAuthenticated(): boolean {
   return tokens !== null;
+}
+
+export function getCurrentUserRole(): UserRole | null {
+  return tokens ? decodeJwtRole(tokens.accessToken) : null;
 }
