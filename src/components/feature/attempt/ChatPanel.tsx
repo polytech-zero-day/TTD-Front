@@ -64,7 +64,11 @@ export default function ChatPanel({
         </span>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
+      {/* 스크롤 동작은 유지하되 스크롤바는 숨긴다 */}
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-y-auto px-5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         <div className="flex flex-col gap-3">
           {messages.map((m) =>
             m.role === 'user' ? (
@@ -134,10 +138,33 @@ export default function ChatPanel({
               제출 후에는 수정과 대화가 불가하며, 작성한 결과물과 AI 대화
               이력이 함께 채점됩니다.
             </p>
-            <p className="text-xs text-santas-gray">
-              메시지 {usage.messagesUsed}회 · 누적{' '}
-              {usage.tokensUsed.toLocaleString()} 토큰 사용
-            </p>
+            {/* 비가역 결정 직전이므로 채점에 반영될 사용량을 강조해서 보여준다 */}
+            <div className="flex gap-2">
+              <div className="flex-1 rounded-lg bg-ebony px-3.5 py-2.5">
+                <div className="text-[11px] text-santas-gray">사용 메시지</div>
+                <div className="text-lg font-bold text-gallery">
+                  {usage.messagesUsed}
+                  <span className="text-xs font-normal text-santas-gray">
+                    {' '}
+                    / {usage.messagesLimit}회
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1 rounded-lg bg-ebony px-3.5 py-2.5">
+                <div className="text-[11px] text-santas-gray">누적 토큰</div>
+                <div
+                  className={`text-lg font-bold ${
+                    isOverBaseline(usage) ? 'text-[#e2574c]' : 'text-neptune'
+                  }`}
+                >
+                  {usage.tokensUsed.toLocaleString()}
+                </div>
+                <div className="text-[11px] text-santas-gray">
+                  적정 {usage.tokensBaseline.toLocaleString()} ·{' '}
+                  {isOverBaseline(usage) ? '초과 (효율 감점)' : '이내'}
+                </div>
+              </div>
+            </div>
             <div className="flex justify-end gap-2">
               <Button size="sm" variant="muted" onClick={onCancelConfirm}>
                 취소
