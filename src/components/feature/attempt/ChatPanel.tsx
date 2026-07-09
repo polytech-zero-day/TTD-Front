@@ -73,14 +73,12 @@ export default function ChatPanel({
             ) : (
               <div
                 key={m.id}
-                className="mr-16 self-start rounded-xl rounded-tl-sm bg-charade px-4 py-2.5"
+                className="mr-16 min-w-0 self-start rounded-xl rounded-tl-sm bg-charade px-4 py-2.5"
               >
                 <div className="text-[11px] font-semibold text-santas-gray">
                   AI
                 </div>
-                <p className="text-sm whitespace-pre-wrap text-gallery">
-                  {m.content}
-                </p>
+                <MessageContent content={m.content} />
               </div>
             )
           )}
@@ -91,22 +89,7 @@ export default function ChatPanel({
             </div>
           )}
 
-          {phase === 'grading' && (
-            <div className="mx-auto my-6 flex w-[340px] flex-col items-center gap-2.5 rounded-xl bg-mirage p-6 text-center shadow-lg">
-              <h3 className="text-base font-bold text-gallery">
-                ✓ 제출이 완료되었습니다
-              </h3>
-              <p className="text-[13px] text-santas-gray">
-                결과물과 대화 이력을 채점하고 있습니다…
-              </p>
-              <div className="h-1 w-48 overflow-hidden rounded-full bg-charade">
-                <div className="h-full w-1/2 animate-pulse rounded-full bg-wedgewood" />
-              </div>
-              <p className="text-xs text-santas-gray/70">
-                완료되면 결과 리포트로 자동 이동합니다
-              </p>
-            </div>
-          )}
+          {phase === 'grading' && <GradingCard />}
         </div>
       </div>
 
@@ -209,6 +192,70 @@ export default function ChatPanel({
         </p>
       </div>
     </section>
+  );
+}
+
+// AI 응답의 ``` 코드 펜스를 분리해 텍스트/코드 세그먼트로 렌더링한다.
+function MessageContent({ content }: { content: string }) {
+  const segments: { code: boolean; text: string }[] = [];
+  const fence = /```[a-zA-Z]*\n?([\s\S]*?)```/g;
+  let cursor = 0;
+  let match;
+  while ((match = fence.exec(content)) !== null) {
+    if (match.index > cursor) {
+      segments.push({ code: false, text: content.slice(cursor, match.index) });
+    }
+    segments.push({ code: true, text: (match[1] ?? '').replace(/\n$/, '') });
+    cursor = match.index + match[0].length;
+  }
+  if (cursor < content.length) {
+    segments.push({ code: false, text: content.slice(cursor) });
+  }
+
+  return (
+    <div className="flex min-w-0 flex-col">
+      {segments.map((seg, i) =>
+        seg.code ? (
+          <pre
+            key={i}
+            className="my-1.5 overflow-x-auto rounded-lg bg-ebony p-3 font-mono text-[12.5px] leading-relaxed text-gallery"
+          >
+            {seg.text}
+          </pre>
+        ) : (
+          <p key={i} className="text-sm whitespace-pre-wrap text-gallery">
+            {seg.text}
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
+// 채점 대기 카드. 실제 진행률은 서버가 줄 수 없어(LLM 단일 호출) 경과 시간을 표시한다.
+function GradingCard() {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="mx-auto my-6 flex w-[340px] flex-col items-center gap-2.5 rounded-xl bg-mirage p-6 text-center shadow-lg">
+      <h3 className="text-base font-bold text-gallery">
+        ✓ 제출이 완료되었습니다
+      </h3>
+      <p className="text-[13px] text-santas-gray">
+        결과물과 대화 이력을 채점하고 있습니다…
+      </p>
+      <div className="h-1 w-48 overflow-hidden rounded-full bg-charade">
+        <div className="h-full w-1/2 animate-pulse rounded-full bg-wedgewood" />
+      </div>
+      <p className="text-xs text-santas-gray/70">
+        {elapsed}초 경과 · 완료되면 결과 리포트로 자동 이동합니다
+      </p>
+    </div>
   );
 }
 
