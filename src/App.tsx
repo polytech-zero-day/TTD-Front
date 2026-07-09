@@ -11,6 +11,7 @@ import MyPage from './pages/MyPage';
 import Leaderboard from './pages/Leaderboard';
 import AttemptPage from './pages/AttemptPage';
 import GradingPage from './pages/GradingPage';
+import ResultPage from './pages/ResultPage';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
         <Route path="/problems/:id/attempt" element={<AttemptPage />} />
         <Route path="/grading" element={<GradingPage />} />
+        <Route path="/result" element={<ResultPage />} />
       </Routes>
     </BrowserRouter>
   );
