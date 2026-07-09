@@ -5,6 +5,10 @@ import type { AttemptState } from '@/types/attempt';
 import { isInputLocked, isOverBaseline } from '@/types/attempt';
 import TextareaAutosize from 'react-textarea-autosize';
 import { BarLoader } from 'react-spinners';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 import Select from '@/components/ui/Select.tsx';
 
 interface Props {
@@ -199,39 +203,60 @@ export default function ChatPanel({
   );
 }
 
-// AI 응답의 ``` 코드 펜스를 분리해 텍스트/코드 세그먼트로 렌더링한다.
+// AI 응답을 마크다운으로 렌더링한다 (GFM 표 + 코드 하이라이트 포함).
 function MessageContent({ content }: { content: string }) {
-  const segments: { code: boolean; text: string }[] = [];
-  const fence = /```[a-zA-Z]*\n?([\s\S]*?)```/g;
-  let cursor = 0;
-  let match;
-  while ((match = fence.exec(content)) !== null) {
-    if (match.index > cursor) {
-      segments.push({ code: false, text: content.slice(cursor, match.index) });
-    }
-    segments.push({ code: true, text: (match[1] ?? '').replace(/\n$/, '') });
-    cursor = match.index + match[0].length;
-  }
-  if (cursor < content.length) {
-    segments.push({ code: false, text: content.slice(cursor) });
-  }
-
   return (
-    <div className="flex min-w-0 flex-col">
-      {segments.map((seg, i) =>
-        seg.code ? (
-          <pre
-            key={i}
-            className="my-1.5 overflow-x-auto rounded-lg bg-ebony p-3 font-mono text-[12.5px] leading-relaxed text-gallery"
-          >
-            {seg.text}
-          </pre>
-        ) : (
-          <p key={i} className="text-sm whitespace-pre-wrap text-gallery">
-            {seg.text}
-          </p>
-        )
-      )}
+    <div className="flex min-w-0 flex-col gap-2 text-sm leading-relaxed text-gallery">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={{
+          pre: (props) => (
+            <pre
+              className="overflow-x-auto rounded-lg bg-ebony p-3 font-mono text-[12.5px] leading-relaxed"
+              {...props}
+            />
+          ),
+          code: ({ className, children, ...rest }) => (
+            <code
+              className={`${className ?? ''} font-mono text-[12.5px] ${
+                className?.includes('language-')
+                  ? '' // 코드 블록: pre가 배경을 담당
+                  : 'rounded bg-ebony px-1.5 py-0.5' // 인라인 코드
+              }`}
+              {...rest}
+            >
+              {children}
+            </code>
+          ),
+          table: (props) => (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-[13px]" {...props} />
+            </div>
+          ),
+          th: (props) => (
+            <th
+              className="border border-gallery-9 bg-ebony/60 px-2 py-1 text-left font-semibold"
+              {...props}
+            />
+          ),
+          td: (props) => (
+            <td className="border border-gallery-9 px-2 py-1" {...props} />
+          ),
+          ul: (props) => <ul className="list-disc pl-5" {...props} />,
+          ol: (props) => <ol className="list-decimal pl-5" {...props} />,
+          a: (props) => (
+            <a
+              className="text-neptune underline"
+              target="_blank"
+              rel="noreferrer"
+              {...props}
+            />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
