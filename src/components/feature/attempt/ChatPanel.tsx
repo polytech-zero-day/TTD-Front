@@ -161,10 +161,10 @@ export default function ChatPanel({
                   }`}
                 >
                   {usage.tokensUsed.toLocaleString()}
-                </div>
-                <div className="text-[11px] text-santas-gray">
-                  적정 {usage.tokensBaseline.toLocaleString()} ·{' '}
-                  {isOverBaseline(usage) ? '초과 (효율 감점)' : '이내'}
+                  <span className="text-xs font-normal text-santas-gray">
+                    {' '}
+                    / {usage.tokensBaseline.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
