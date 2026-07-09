@@ -1,8 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import AdminLayout from './pages/admin/AdminLayout';
+import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import ProblemManagementPage from './pages/admin/ProblemManagementPage';
 import ProblemListPage from './pages/ProblemListPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import MyPage from './pages/MyPage';
@@ -20,8 +22,9 @@ export default function App() {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="users" replace />} />
+          <Route index element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
+          <Route path="problems" element={<ProblemManagementPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
