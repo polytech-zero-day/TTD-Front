@@ -1,70 +1,56 @@
-import type { AttemptUsage, ChatMessage } from '@/types/attempt';
+import { apiFetch } from '@/lib/api/client';
+import type { AttemptStatus, AttemptUsage, ChatMessage } from '@/types/attempt';
 
-// ── 제안 스키마 (1.3 회의용) ───────────────────────────────
-// POST /api/attempts                 { problemId } → AttemptStartResponse
-// POST /api/attempts/{id}/messages   { content }   → AttemptMessageResponse
-// POST /api/attempts/{id}/submit     { artifact }  → { attemptId }
-// GET  /api/attempts/{id}/result     → 채점 완료 여부 폴링 (or SSE)
-
-export interface AttemptStartResponse {
-  attemptId: string;
+// 백엔드 AttemptSnapshotResponse — 시작·새로고침 복원 공용
+export interface AttemptSnapshot {
+  attemptId: number;
+  status: AttemptStatus;
+  remainingSeconds: number;
   usage: AttemptUsage;
-  timeLimitSeconds: number;
+  messages: ChatMessage[];
+  draft: string | null;
 }
 
-export interface AttemptMessageResponse {
-  message: ChatMessage; // assistant 응답
-  usage: AttemptUsage; //  서버 기준 누적 사용량
+export interface AttemptMessageResult {
+  message: ChatMessage;
+  usage: AttemptUsage;
 }
 
-const MOCK = true; // TODO(3.4 API 연결 시): false로 바꾸고 apiFetch 경로 활성화
-
-export async function startAttempt(
-  problemId: number
-): Promise<AttemptStartResponse> {
-  if (MOCK) {
-    return {
-      attemptId: `mock-${problemId}`,
-      usage: {
-        messagesUsed: 0,
-        messagesLimit: 10,
-        tokensUsed: 0,
-        tokensBaseline: 3000,
-      },
-      timeLimitSeconds: 45 * 60,
-    };
-  }
-  // return apiFetch<AttemptStartResponse>('/api/attempts', { ... });
-  throw new Error('not implemented');
+export interface AttemptResult {
+  attemptId: number;
+  status: AttemptStatus;
+  rubricScore: number | null;
+  efficiencyScore: number | null;
+  feedback: string | null;
 }
 
-export async function sendAttemptMessage(
-  attemptId: string,
-  content: string,
-  prevUsage: AttemptUsage
-): Promise<AttemptMessageResponse> {
-  if (MOCK) {
-    await new Promise((r) => setTimeout(r, 1200)); // '응답 생성중…' 상태 확인용
-    return {
-      message: {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `(목 응답) "${content.slice(0, 30)}…"에 대한 절차를 제안합니다.`,
-      },
-      usage: {
-        ...prevUsage,
-        messagesUsed: prevUsage.messagesUsed + 1,
-        tokensUsed: prevUsage.tokensUsed + 300 + Math.floor(content.length / 2),
-      },
-    };
-  }
-  throw new Error('not implemented');
-}
+// 시작 (진행 중 세션이 있으면 서버가 그 스냅샷을 그대로 반환 — 멱등)
+export const startAttempt = (problemId: number) =>
+  apiFetch<AttemptSnapshot>('/api/attempts', {
+    method: 'POST',
+    body: JSON.stringify({ problemId }),
+  });
 
-export async function submitAttempt(attemptId: string, artifact: string) {
-  if (MOCK) {
-    await new Promise((r) => setTimeout(r, 800));
-    return { attemptId };
-  }
-  throw new Error('not implemented');
-}
+// 대화 — prevUsage 파라미터 삭제 (사용량은 서버가 계산해 내려줌)
+export const sendAttemptMessage = (attemptId: number, content: string) =>
+  apiFetch<AttemptMessageResult>(`/api/attempts/${attemptId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  });
+
+// 결과물 자동 저장 (만료 시 자동 제출의 원본)
+export const saveDraft = (attemptId: number, draft: string) =>
+  apiFetch<void>(`/api/attempts/${attemptId}/draft`, {
+    method: 'PUT',
+    body: JSON.stringify({ draft }),
+  });
+
+// 제출 — artifact 파라미터 삭제 (서버가 저장된 draft로 확정)
+export const submitAttempt = (attemptId: number) =>
+  apiFetch<AttemptResult>(`/api/attempts/${attemptId}/submit`, {
+    method: 'POST',
+  });
+
+// 채점 완료 폴링용
+export const getAttemptResult = (attemptId: number) =>
+  apiFetch<AttemptResult>(`/api/attempts/${attemptId}/result`);

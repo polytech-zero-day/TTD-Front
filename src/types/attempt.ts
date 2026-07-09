@@ -1,33 +1,28 @@
-// 응시(S-04) 도메인 타입.
-// 백엔드 3.4(대화 API) 스키마 확정 전이므로, 이 파일이 곧 API 스키마 제안서 역할을 한다.
-
 export type AttemptPhase =
-  | 'chatting' //   입력 가능 (기본)
-  | 'waiting' //    AI 응답 생성 중 — 입력 잠금
-  | 'confirming' // 제출 확인 모달 표시 중
-  | 'grading'; //   제출 확정 — 채점 중, 전체 잠금
+  'loading' | 'chatting' | 'waiting' | 'confirming' | 'grading';
+
+export type AttemptStatus = 'IN_PROGRESS' | 'GRADING' | 'GRADED';
 
 export interface ChatMessage {
-  id: string;
+  id: number | string; // 서버는 number, 낙관적 렌더링용 임시 메시지는 string
   role: 'user' | 'assistant';
   content: string;
 }
 
-// 서버가 매 응답마다 내려줘야 하는 사용량
 export interface AttemptUsage {
-  messagesUsed: number; //   사용한 메시지 수
-  messagesLimit: number; //  문제당 제한 (기본 10)
-  tokensUsed: number; //     누적 토큰
-  tokensBaseline: number; // 적정선 (초과분부터 효율 감점)
+  messagesUsed: number;
+  messagesLimit: number;
+  tokensUsed: number;
+  tokensBaseline: number;
 }
 
 export interface AttemptState {
-  attemptId: string | null;
+  attemptId: number | null; // 백엔드 id가 Long이라 string → number
   phase: AttemptPhase;
   messages: ChatMessage[];
   usage: AttemptUsage;
   remainingSeconds: number;
-  draft: string; // 우측 패널 결과물 텍스트
+  draft: string;
 }
 
 export const isInputLocked = (s: AttemptState) =>
