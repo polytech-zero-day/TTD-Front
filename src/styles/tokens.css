@@ -17,6 +17,9 @@
   --color-gallery: #eeeeee; /* 다크 배경 위 기본 텍스트 */
   --color-gallery-9: rgba(238, 238, 238, 0.09); /* 서브틀 보더 */
   --color-mirage-glow: #201e43; /* 인증 화면 배경 radial-gradient 중심색 */
-
+  --color-neptune: #86b4bf; /* 강조 숫자 */
+  --color-mid-gray: #565968; /* 산점도 비교 점 */
+  --color-success: #4ade80; /* 완료 상태 텍스트 */
+  --color-success-bg: rgba(34, 197, 94, 0.16); /* 완료 상태 배경 */
   --font-sans: 'Roboto', system-ui, sans-serif;
 }
