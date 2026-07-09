@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import type { CreateAdminUserInput, UserRole } from '@/types/admin';
+import Select from '@/components/ui/Select.tsx';
 
 interface CreateUserFormProps {
   onSubmit: (input: CreateAdminUserInput) => Promise<void>;
@@ -86,15 +87,16 @@ export default function CreateUserForm({
         />
         <label className="flex w-full flex-col gap-1.5" htmlFor="new-user-role">
           <span className="text-[12.4px] font-medium text-gallery">권한</span>
-          <select
+          <Select
             id="new-user-role"
+            variant="form"
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="w-full rounded-lg border border-gallery-9 bg-ebony px-[13px] py-[10px] text-[13.5px] text-gallery outline-none focus:border-wedgewood"
+            className="w-full"
           >
             <option value="USER">USER</option>
             <option value="ADMIN">ADMIN</option>
-          </select>
+          </Select>
         </label>
       </div>
 

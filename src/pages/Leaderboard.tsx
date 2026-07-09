@@ -9,6 +9,7 @@ import {
   dummyProblems,
   getProblemRanking,
 } from '../data/dummyLeaderboard';
+import Select from '@/components/ui/Select.tsx';
 
 const dummyUser = { name: '김지수', plan: 'FREE' as const };
 
@@ -85,17 +86,18 @@ export default function Leaderboard() {
               </div>
               {/* TODO: 백엔드 연동 후 실제 문제 목록/문제별 랭킹 API로 교체 */}
               <div className="relative">
-                <select
+                <Select
+                  variant="form"
+                  className="w-56"
                   value={selectedProblemId}
                   onChange={(e) => setSelectedProblemId(e.target.value)}
-                  className="appearance-none bg-ebony border border-gallery-9 text-gallery text-sm rounded-md pl-3 pr-10 py-2 cursor-pointer focus:outline-none focus:border-wedgewood"
                 >
                   {dummyProblems.map((p) => (
                     <option key={p.id} value={p.id} className="bg-mirage text-gallery">
                       {p.name}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <svg
                   className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   width="12"
