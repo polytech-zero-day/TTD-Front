@@ -28,7 +28,7 @@ export default function Button({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center rounded-lg text-[15px] font-medium cursor-pointer ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center rounded-lg text-[15px] font-medium ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
       {...rest}
     >
       {children}

@@ -18,10 +18,12 @@ const NAV_ITEMS: { key: NavKey; label: string; path: string }[] = [
 
 export default function Topbar({ active, userName, plan }: TopbarProps) {
   return (
-    <header className="flex items-center h-[60px] px-6 bg-mirage font-sans">
-      <a href="/" className="flex items-center gap-2 mr-10 no-underline">
-        <span className="w-[9px] h-[9px] rounded-sm bg-wedgewood" />
-        <span className="font-bold text-base tracking-[-0.16px] text-gallery">TTD</span>
+    <header className="flex h-[60px] items-center bg-mirage px-6 font-sans">
+      <a href="/" className="mr-10 flex items-center gap-2 no-underline">
+        <span className="h-[9px] w-[9px] rounded-sm bg-wedgewood" />
+        <span className="text-base font-bold tracking-[-0.16px] text-gallery">
+          TTD
+        </span>
       </a>
 
       <nav className="flex items-center gap-0.5">
@@ -29,8 +31,10 @@ export default function Topbar({ active, userName, plan }: TopbarProps) {
           <a
             key={item.key}
             href={item.path}
-            className={`px-3 py-2 rounded-md text-sm font-medium no-underline whitespace-nowrap ${
-              active === item.key ? 'bg-biscay text-gallery' : 'text-santas-gray'
+            className={`rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap no-underline ${
+              active === item.key
+                ? 'bg-biscay text-gallery'
+                : 'text-santas-gray'
             }`}
           >
             {item.label}
@@ -38,9 +42,9 @@ export default function Topbar({ active, userName, plan }: TopbarProps) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="ml-auto flex items-center gap-3">
         <Badge tone="pill">{plan}</Badge>
-        <div className="flex items-center gap-2 pl-[5px] pr-[10px] py-[5px] rounded-full bg-charade">
+        <div className="flex items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px]">
           <Avatar initial={userName.charAt(0)} size="sm" />
           <span className="text-[13px] text-gallery">{userName}</span>
         </div>

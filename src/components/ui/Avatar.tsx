@@ -13,7 +13,7 @@ const SIZE_CLASS: Record<NonNullable<AvatarProps['size']>, string> = {
 export default function Avatar({ initial, size = 'sm' }: AvatarProps) {
   return (
     <span
-      className={`flex items-center justify-center rounded-full bg-chathams-blue text-white font-semibold shrink-0 ${SIZE_CLASS[size]}`}
+      className={`flex shrink-0 items-center justify-center rounded-full bg-chathams-blue font-semibold text-white ${SIZE_CLASS[size]}`}
     >
       {initial}
     </span>
