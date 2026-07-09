@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import type { AttemptState } from '@/types/attempt';
 import { isInputLocked, isOverBaseline } from '@/types/attempt';
 import TextareaAutosize from 'react-textarea-autosize';
+import { BarLoader } from 'react-spinners';
 import Select from '@/components/ui/Select.tsx';
 
 interface Props {
@@ -235,7 +236,7 @@ function MessageContent({ content }: { content: string }) {
   );
 }
 
-// 채점 대기 카드. 실제 진행률은 서버가 줄 수 없어(LLM 단일 호출) 경과 시간을 표시한다.
+// 채점 대기 모달. 실제 진행률은 서버가 줄 수 없어(LLM 단일 호출) 경과 시간을 표시한다.
 function GradingCard() {
   const [elapsed, setElapsed] = useState(0);
 
@@ -245,19 +246,29 @@ function GradingCard() {
   }, []);
 
   return (
-    <div className="mx-auto my-6 flex w-[340px] flex-col items-center gap-2.5 rounded-xl bg-mirage p-6 text-center shadow-lg">
-      <h3 className="text-base font-bold text-gallery">
-        ✓ 제출이 완료되었습니다
-      </h3>
-      <p className="text-[13px] text-santas-gray">
-        결과물과 대화 이력을 채점하고 있습니다…
-      </p>
-      <div className="h-1 w-48 overflow-hidden rounded-full bg-charade">
-        <div className="h-full w-1/2 animate-pulse rounded-full bg-wedgewood" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="flex w-[360px] flex-col items-center gap-3 rounded-xl bg-mirage p-6 text-center shadow-2xl"
+      >
+        <h3 className="text-base font-bold text-gallery">
+          ✓ 제출이 완료되었습니다
+        </h3>
+        <p className="text-[13px] text-santas-gray">
+          결과물과 대화 이력을 채점하고 있습니다…
+        </p>
+        <BarLoader color="#508c9b" width={200} height={4} />
+        <p className="text-xs text-santas-gray/70">
+          {elapsed}초 경과 · 완료되면 결과 리포트로 자동 이동합니다
+        </p>
+        {elapsed >= 60 && (
+          <p className="text-xs text-[#e2574c]">
+            채점이 평소보다 오래 걸리고 있어요. 잠시 뒤에도 그대로면
+            새로고침하거나 관리자에게 문의해 주세요.
+          </p>
+        )}
       </div>
-      <p className="text-xs text-santas-gray/70">
-        {elapsed}초 경과 · 완료되면 결과 리포트로 자동 이동합니다
-      </p>
     </div>
   );
 }
