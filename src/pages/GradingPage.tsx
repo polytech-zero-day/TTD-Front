@@ -51,11 +51,11 @@ export default function GradingPage() {
 
         {/* 예상 소요 시간 안내 */}
         <div className="w-full flex flex-col gap-1.5 p-4 bg-wedgewood/[0.08] border border-wedgewood/20 rounded-lg">
-          <div className="text-[10.5px] font-bold tracking-[0.88px] text-santas-gray uppercase">
+          <div className="text-[14px] font-bold tracking-[0.88px] text-santas-gray uppercase">
             예상 소요 시간
           </div>
           <p className="text-[13.5px] text-gallery">
-            채점에는 약 10~20초 정도 소요됩니다. 이 시간동안:
+            채점에는 약 10~20초 정도 소요됩니다.
           </p>
           <ul className="flex flex-col gap-1.5">
             {CHECKLIST.map((item) => (
@@ -75,13 +75,13 @@ export default function GradingPage() {
             className="w-full"
             onClick={() => (window.location.href = '/result')}
           >
-            채점 완료 시뮬레이션 (테스트용)
+            채점 완료로 이동(테스트용, api연동 후 삭제 예정)
           </Button>
           <Button
             variant="outline"
             size="lg"
             className="w-full"
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = '/problems')}
           >
             목록으로 돌아가기
           </Button>
