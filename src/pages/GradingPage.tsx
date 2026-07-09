@@ -89,10 +89,20 @@ export default function GradingPage() {
 
         {/* 진행률 */}
         <div className="w-full flex flex-col items-center gap-2">
-          <div className="text-xl font-semibold tracking-[0.6px] text-santas-gray">
+          <div
+            id="grading-progress-label"
+            className="text-xl font-semibold tracking-[0.6px] text-santas-gray"
+          >
             진행률
           </div>
-          <div className="w-full h-1 rounded-full bg-gallery-9 overflow-hidden">
+          <div
+            role="progressbar"
+            aria-labelledby="grading-progress-label"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            className="w-full h-1 rounded-full bg-gallery-9 overflow-hidden"
+          >
             <div
               className="h-full bg-wedgewood rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
