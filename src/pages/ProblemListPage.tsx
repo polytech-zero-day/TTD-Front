@@ -54,14 +54,14 @@ export default function ProblemListPage() {
   }, [level, typeLabel]);
 
   return (
-    <div className="min-h-[1200px] w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar
         active="catalog"
         userName={dummyViewer.name}
         plan={dummyViewer.plan}
       />
 
-      <main className="mx-auto flex w-[1160px] flex-col gap-6 px-5 pt-8 pb-20">
+      <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-6 px-5 pt-8 pb-20">
         {/* 페이지 제목 */}
         <div className="flex flex-col gap-2">
           <h1 className="text-[28px] font-bold text-gallery">문제 카탈로그</h1>
