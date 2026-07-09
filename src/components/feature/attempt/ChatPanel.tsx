@@ -64,12 +64,14 @@ export default function ChatPanel({
             m.role === 'user' ? (
               <div
                 key={m.id}
-                className="ml-16 self-end rounded-xl rounded-tr-sm bg-jungle-mist px-4 py-2.5"
+                className="ml-16 self-end rounded-xl rounded-tr-sm bg-wedgewood px-4 py-2.5"
               >
-                <div className="text-[11px] font-semibold text-mirage/60">
+                <div className="text-[11px] font-semibold text-white/70">
                   나
                 </div>
-                <p className="text-sm text-mirage">{m.content}</p>
+                <p className="text-sm whitespace-pre-wrap text-white">
+                  {m.content}
+                </p>
               </div>
             ) : (
               <div
