@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import type { AttemptState } from '@/types/attempt';
@@ -220,12 +221,7 @@ function MessageContent({ content }: { content: string }) {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
-          pre: (props) => (
-            <pre
-              className="overflow-x-auto rounded-lg bg-ebony p-3 font-mono text-[12.5px] leading-relaxed"
-              {...props}
-            />
-          ),
+          pre: (props) => <CodeBlock {...props} />,
           code: ({ className, children, ...rest }) => (
             <code
               className={`${className ?? ''} font-mono text-[12.5px] ${
@@ -266,6 +262,52 @@ function MessageContent({ content }: { content: string }) {
       >
         {content}
       </ReactMarkdown>
+    </div>
+  );
+}
+
+// 코드 블록 + 우상단 복사 버튼 (hover 시 노출, 복사 후 1.5초간 체크 표시)
+function CodeBlock(props: ComponentPropsWithoutRef<'pre'>) {
+  const preRef = useRef<HTMLPreElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    const text = preRef.current?.innerText ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* 클립보드 권한 거부 시 무시 */
+    }
+  }
+
+  return (
+    <div className="group relative">
+      <pre
+        ref={preRef}
+        className="overflow-x-auto rounded-lg bg-ebony p-3 pr-11 font-mono text-[12.5px] leading-relaxed"
+        {...props}
+      />
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={copied ? '복사됨' : '코드 복사'}
+        className="absolute top-2 right-2 cursor-pointer rounded-md bg-charade p-1.5 text-santas-gray opacity-0 transition-opacity group-hover:opacity-100 hover:text-gallery"
+      >
+        {copied ? (
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.8"
+              strokeLinecap="round" strokeLinejoin="round" className="text-success" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M10.5 5.5V4a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"
+              stroke="currentColor" strokeWidth="1.4" />
+          </svg>
+        )}
+      </button>
     </div>
   );
 }
