@@ -10,7 +10,7 @@ interface TopbarProps {
 }
 
 const NAV_ITEMS: { key: NavKey; label: string; path: string }[] = [
-  { key: 'catalog', label: '문제 카탈로그', path: '/' },
+  { key: 'catalog', label: '문제 카탈로그', path: '/problems' },
   { key: 'mypage', label: '마이페이지', path: '/mypage' },
   { key: 'leaderboard', label: '리더보드', path: '/leaderboard' },
   { key: 'pricing', label: '요금제', path: '/pricing' },
