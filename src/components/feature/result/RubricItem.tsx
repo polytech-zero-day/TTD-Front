@@ -1,4 +1,4 @@
-import type { RubricCriterionData } from '../data/dummyResult';
+import type { RubricCriterionData } from '@/data/dummyResult';
 
 interface RubricItemProps {
   data: RubricCriterionData;

@@ -1,4 +1,4 @@
-import type { AttemptRecord } from '../data/dummyResult';
+import type { AttemptRecord } from '@/data/dummyResult';
 
 interface AttemptTimelineItemProps {
   attempt: AttemptRecord;

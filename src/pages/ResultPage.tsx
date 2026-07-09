@@ -65,13 +65,13 @@ export default function ResultPage() {
             <ScoreRow label="종합 점수" value={dummyScore.final} big />
             <PercentileRow percentile={dummyScore.percentile} />
 
-            <div className="flex flex-col gap-3.5 p-2.5 mt-2">
-              <span className="text-[10.5px] font-semibold tracking-[0.88px] text-santas-gray uppercase">
+            <div className="flex flex-col gap-3.5 p-2.5 mt-auto">
+              <span className="text-xs font-semibold tracking-[0.88px] text-santas-gray uppercase">
                 참고
               </span>
               <ul className="flex flex-col gap-2">
                 {dummyReferenceNotes.map((note) => (
-                  <li key={note} className="text-xs text-santas-gray">
+                  <li key={note} className="text-sm text-santas-gray">
                     • {note}
                   </li>
                 ))}
@@ -140,14 +140,22 @@ export default function ResultPage() {
 function ScoreRow({ label, value, big }: { label: string; value: number; big?: boolean }) {
   return (
     <div className="flex items-center justify-between py-4 border-b border-gallery-9">
-      <span className="text-base font-semibold text-gallery">{label}</span>
+      <span className={`font-semibold text-gallery ${big ? 'text-lg' : 'text-base'}`}>
+        {label}
+      </span>
       <span
-        className={`flex items-center gap-1 rounded-md border border-wedgewood bg-wedgewood/20 font-bold text-wedgewood ${
-          big ? 'px-4 py-1.5 text-lg' : 'px-3 py-1 text-sm'
+        className={`flex items-center gap-1 rounded-md font-bold ${
+          big
+            ? 'px-5 py-2 bg-wedgewood border border-wedgewood text-white text-2xl shadow-[0_0_18px_rgba(80,140,155,0.45)]'
+            : 'px-3 py-1 bg-wedgewood/20 border border-wedgewood text-wedgewood text-sm'
         }`}
       >
         {value}
-        <span className="text-santas-gray text-[11px] font-normal">/100</span>
+        <span
+          className={`font-normal ${big ? 'text-white/70 text-xs' : 'text-santas-gray text-[11px]'}`}
+        >
+          /100
+        </span>
       </span>
     </div>
   );
@@ -157,7 +165,7 @@ function PercentileRow({ percentile }: { percentile: number }) {
   return (
     <div className="flex items-center justify-between py-4 border-b border-gallery-9">
       <span className="text-base font-semibold text-gallery">백분위</span>
-      <span className="px-3 py-1.5 rounded-md bg-charade text-gallery text-sm font-bold">
+      <span className="px-4 py-1.5 rounded-md bg-wedgewood/25 border border-wedgewood text-wedgewood text-base font-bold">
         상위 {percentile}%
       </span>
     </div>
