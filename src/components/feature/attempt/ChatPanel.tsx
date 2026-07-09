@@ -91,30 +91,6 @@ export default function ChatPanel({
             </div>
           )}
 
-          {phase === 'confirming' && (
-            <div className="mx-auto my-6 flex w-[340px] flex-col gap-3 rounded-xl bg-mirage p-6 shadow-lg">
-              <h3 className="text-base font-bold text-gallery">
-                최종 제출할까요?
-              </h3>
-              <p className="text-[13px] leading-relaxed text-santas-gray">
-                제출 후에는 수정과 대화가 불가하며, 작성한 결과물과 AI 대화
-                이력이 함께 채점됩니다.
-              </p>
-              <p className="text-xs text-santas-gray">
-                메시지 {usage.messagesUsed}회 · 누적{' '}
-                {usage.tokensUsed.toLocaleString()} 토큰 사용
-              </p>
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="muted" onClick={onCancelConfirm}>
-                  취소
-                </Button>
-                <Button size="sm" onClick={onConfirmSubmit}>
-                  제출 확정
-                </Button>
-              </div>
-            </div>
-          )}
-
           {phase === 'grading' && (
             <div className="mx-auto my-6 flex w-[340px] flex-col items-center gap-2.5 rounded-xl bg-mirage p-6 text-center shadow-lg">
               <h3 className="text-base font-bold text-gallery">
@@ -133,6 +109,45 @@ export default function ChatPanel({
           )}
         </div>
       </div>
+
+      {phase === 'confirming' && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={onCancelConfirm}
+          role="presentation"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="submit-confirm-title"
+            className="flex w-[360px] flex-col gap-3 rounded-xl bg-mirage p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              id="submit-confirm-title"
+              className="text-base font-bold text-gallery"
+            >
+              최종 제출할까요?
+            </h3>
+            <p className="text-[13px] leading-relaxed text-santas-gray">
+              제출 후에는 수정과 대화가 불가하며, 작성한 결과물과 AI 대화
+              이력이 함께 채점됩니다.
+            </p>
+            <p className="text-xs text-santas-gray">
+              메시지 {usage.messagesUsed}회 · 누적{' '}
+              {usage.tokensUsed.toLocaleString()} 토큰 사용
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="muted" onClick={onCancelConfirm}>
+                취소
+              </Button>
+              <Button size="sm" onClick={onConfirmSubmit}>
+                제출 확정
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="shrink-0 border-t border-gallery-9 px-5 py-3">
         <div className="mb-2.5 flex items-center gap-3 text-xs text-santas-gray">
