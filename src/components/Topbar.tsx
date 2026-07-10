@@ -43,7 +43,9 @@ export default function Topbar({ active, userName, plan }: TopbarProps) {
       </nav>
 
       <div className="ml-auto flex items-center gap-3">
-        <Badge tone="pill">{plan}</Badge>
+        <a href="/pricing" className="no-underline">
+          <Badge tone="pill">{plan}</Badge>
+        </a>
         <div className="flex items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px]">
           <Avatar initial={userName.charAt(0)} size="sm" />
           <span className="text-[13px] text-gallery">{userName}</span>

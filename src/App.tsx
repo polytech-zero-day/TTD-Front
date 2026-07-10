@@ -11,6 +11,8 @@ import Leaderboard from './pages/Leaderboard';
 import AttemptPage from './pages/AttemptPage';
 import GradingPage from './pages/GradingPage';
 import ResultPage from './pages/ResultPage';
+import PricingPage from './pages/PricingPage';
+import PaymentPage from './pages/PaymentPage';
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
