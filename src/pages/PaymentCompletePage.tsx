@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import Topbar from '../components/Topbar';
 import Button from '../components/ui/Button';
 import { plans } from '../data/dummyPricing';
@@ -13,14 +15,30 @@ const paidPlan = plans.find((plan) => plan.id === 'PAID');
 const formatDate = (iso: string) => iso.slice(0, 10);
 
 // S-14 결제 완료 화면. 결제 성공(PaymentPage) 직후 진입해 구독 전환 완료를 안내한다.
+// 결제 직후에는 라우터 state의 구독 응답을 그대로 쓰고, 새로고침 등 state가 없으면 재조회한다.
 export default function PaymentCompletePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const stateSubscription = (
+    location.state as { subscription?: SubscriptionResponse } | null
+  )?.subscription;
+
   const [subscription, setSubscription] = useState<SubscriptionResponse | null>(
-    null
+    stateSubscription ?? null
   );
 
   useEffect(() => {
-    getMySubscription().then(setSubscription);
-  }, []);
+    if (stateSubscription) return;
+    getMySubscription().then((sub) => {
+      if (sub) {
+        setSubscription(sub);
+        return;
+      }
+      // 결제 없이 직접 진입 — "결제 완료" 안내가 거짓이 되므로 요금제로 돌려보낸다
+      toast.error('구독 내역이 없습니다. 요금제에서 결제를 진행해주세요.');
+      navigate('/pricing', { replace: true });
+    });
+  }, [stateSubscription, navigate]);
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
