@@ -136,6 +136,27 @@ describe('useAttempt', () => {
     expect(onGraded).toHaveBeenCalledTimes(1);
   });
 
+  it('제출이 네트워크 오류로 접수되지 않으면 폴링에 들어가지 않고 대화 상태로 복귀한다', async () => {
+    vi.useFakeTimers();
+    saveDraftMock.mockResolvedValue(undefined);
+    submitMock.mockRejectedValue(new TypeError('Failed to fetch')); // ApiError가 아닌 네트워크 오류
+    const onGraded = vi.fn();
+    const { result } = renderHook(() => useAttempt(1, onGraded));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await result.current.confirmSubmit();
+    });
+
+    expect(result.current.state.phase).toBe('chatting'); // 무한 채점 모달 방지
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(getResultMock).not.toHaveBeenCalled(); // 폴링 미시작
+  });
+
   it('재진입 시 이미 제출된 세션이면 바로 채점 폴링으로 넘어간다', async () => {
     vi.useFakeTimers();
     startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING' });

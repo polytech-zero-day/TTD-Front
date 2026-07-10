@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { ApiError } from '@/lib/api/client';
 import {
   getAttemptResult,
   regradeAttempt,
@@ -51,8 +53,13 @@ export function useAttempt(
             clearInterval(pollTimerRef.current);
             setState((s) => ({ ...s, phase: 'failed' }));
           }
-        } catch {
-          /* 일시 오류는 다음 폴링에서 재시도 */
+        } catch (err) {
+          if (err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_FOUND') {
+            // 응시가 사라짐(서버 초기화 등) — 폴링을 멈추고 이탈 처리
+            clearInterval(pollTimerRef.current);
+            onStartBlockedRef.current?.(err.message);
+          }
+          /* 그 외 일시 오류는 다음 폴링에서 재시도 */
         }
       }, RESULT_POLL_MS);
     },
@@ -140,7 +147,12 @@ export function useAttempt(
           messages: [...s.messages, message],
           usage,
         }));
-      } catch {
+      } catch (err) {
+        toast.error(
+          err instanceof ApiError
+            ? err.message
+            : '메시지 전송에 실패했습니다. 다시 시도해주세요.'
+        );
         setState((s) => ({
           ...s,
           phase: 'chatting',
@@ -186,8 +198,15 @@ export function useAttempt(
     try {
       await saveDraft(state.attemptId, state.draft); // 디바운스 미반영분 확정 저장
       await submitAttempt(state.attemptId);
-    } catch {
-      /* 이미 만료로 자동 제출된 경우(ATTEMPT_NOT_IN_PROGRESS)도 폴링으로 수렴 */
+      toast.success('제출이 완료되었습니다. 채점을 시작할게요.');
+    } catch (err) {
+      if (!(err instanceof ApiError)) {
+        // 네트워크 단절 등 — 제출이 접수되지 않았으므로 폴링에 들어가면 무한 대기가 된다
+        toast.error('제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.');
+        setState((s) => ({ ...s, phase: 'chatting' }));
+        return;
+      }
+      /* 이미 만료로 자동 제출된 경우(ATTEMPT_NOT_IN_PROGRESS)는 폴링으로 수렴 */
     }
     beginResultPolling(state.attemptId);
   }, [state.attemptId, state.draft, beginResultPolling]);
@@ -198,9 +217,13 @@ export function useAttempt(
     if (!attemptId || state.phase !== 'failed') return;
     try {
       await regradeAttempt(attemptId);
+      toast.success('재채점을 요청했습니다.');
       beginResultPolling(attemptId);
-    } catch {
-      /* 실패 상태 유지 — 사용자가 다시 시도하거나 관리자 문의 */
+    } catch (err) {
+      // 실패 상태 유지 — 사용자가 다시 시도하거나 관리자 문의
+      toast.error(
+        err instanceof ApiError ? err.message : '재채점 요청에 실패했습니다.'
+      );
     }
   }, [state.attemptId, state.phase, beginResultPolling]);
 
