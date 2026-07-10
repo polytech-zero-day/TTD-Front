@@ -32,14 +32,18 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
         <p className="text-[13px] text-gallery leading-relaxed line-clamp-1">{prompt}</p>
 
         <div className="flex items-center gap-4 text-[11px]">
+          {inTokens !== undefined && (
+            <span className="text-santas-gray">
+              IN: <span className="text-gallery font-semibold">{inTokens}</span>
+            </span>
+          )}
+          {outTokens !== undefined && (
+            <span className="text-santas-gray">
+              OUT: <span className="text-gallery font-semibold">{outTokens}</span>
+            </span>
+          )}
           <span className="text-santas-gray">
-            IN: <span className="text-gallery font-semibold">{inTokens}</span>
-          </span>
-          <span className="text-santas-gray">
-            OUT: <span className="text-gallery font-semibold">{outTokens}</span>
-          </span>
-          <span className="text-santas-gray">
-            TOTAL: <span className="text-gallery font-semibold">{totalTokens}</span>
+            TOTAL: <span className="text-gallery font-semibold">{totalTokens.toLocaleString()}</span>
           </span>
         </div>
 

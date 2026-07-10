@@ -27,7 +27,7 @@ const INITIAL: AttemptState = {
 const DRAFT_SAVE_DELAY_MS = 2000;
 const RESULT_POLL_MS = 3000;
 
-export function useAttempt(problemId: number, onGraded: () => void) {
+export function useAttempt(problemId: number, onGraded: (attemptId: number) => void) {
   const [state, setState] = useState<AttemptState>(INITIAL);
   const startedRef = useRef(false);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -41,7 +41,7 @@ export function useAttempt(problemId: number, onGraded: () => void) {
           const result = await getAttemptResult(attemptId);
           if (result.status === 'GRADED') {
             clearInterval(pollTimerRef.current);
-            onGraded();
+            onGraded(attemptId);
           } else if (result.status === 'GRADING_FAILED') {
             // 채점 실패 확정 — 폴링을 멈추고 재채점 UI로 전환
             clearInterval(pollTimerRef.current);

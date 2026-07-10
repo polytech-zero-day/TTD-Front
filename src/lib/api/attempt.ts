@@ -16,12 +16,30 @@ export interface AttemptMessageResult {
   usage: AttemptUsage;
 }
 
+export interface RubricCriterion {
+  name: string;
+  score: number;
+  maxScore: number;
+  comment: string;
+}
+
+// 결과 리포트 응답 — 결과 화면(S-05)이 이 응답 하나로 그려진다
 export interface AttemptResult {
   attemptId: number;
   status: AttemptStatus;
+  problemTitle: string;
+  difficulty: string;
+  attemptOrdinal: number; // 이 문제 몇 번째 응시인지
+  maxAttempts: number;
+  submittedAt: string | null;
   rubricScore: number | null;
   efficiencyScore: number | null;
+  finalScore: number | null; // 품질 60% + 효율 40% (서버 계산)
   feedback: string | null;
+  criteria: RubricCriterion[];
+  messages: ChatMessage[]; // tokensUsed·createdAt 포함
+  totalTokens: number;
+  tokenBudget: number;
 }
 
 // 시작 (진행 중 세션이 있으면 서버가 그 스냅샷을 그대로 반환 — 멱등)

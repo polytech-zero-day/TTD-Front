@@ -35,7 +35,7 @@ export default function App() {
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
         <Route path="/problems/:id/attempt" element={<AttemptPage />} />
         <Route path="/grading" element={<GradingPage />} />
-        <Route path="/result" element={<ResultPage />} />
+        <Route path="/result/:attemptId" element={<ResultPage />} />
       </Routes>
     </BrowserRouter>
   );
