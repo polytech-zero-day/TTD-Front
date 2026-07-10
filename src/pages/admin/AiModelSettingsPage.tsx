@@ -127,7 +127,8 @@ export default function AiModelSettingsPage() {
                     </Select>
                     <Button
                       variant="primary"
-                      size="md"
+                      size="sm"
+                      className="disabled:cursor-default disabled:opacity-50"
                       disabled={!dirty || savingPurpose === setting.purpose}
                       onClick={() => handleSave(setting.purpose)}
                     >
