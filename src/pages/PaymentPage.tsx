@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import Topbar from '../components/Topbar';
 import Button from '../components/ui/Button';
 import { plans } from '../data/dummyPricing';
@@ -11,6 +12,7 @@ const dummyUser = { name: '김지수', plan: 'FREE' as const };
 const paidPlan = plans.find((plan) => plan.id === 'PAID');
 
 export default function PaymentPage() {
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,8 +21,9 @@ export default function PaymentPage() {
     setIsProcessing(true);
     try {
       const billingKey = await issueBillingKey();
-      await subscribe(billingKey);
-      window.location.href = '/payment/complete';
+      const subscription = await subscribe(billingKey);
+      // 구독 응답을 state로 넘겨 완료 화면이 재조회 없이 확정 데이터를 표시
+      navigate('/payment/complete', { state: { subscription } });
     } catch (err) {
       setError(
         err instanceof BillingKeyIssueError || err instanceof ApiError
