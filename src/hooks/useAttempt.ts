@@ -29,6 +29,11 @@ const INITIAL: AttemptState = {
 const DRAFT_SAVE_DELAY_MS = 2000;
 const RESULT_POLL_MS = 3000;
 
+// 타이머가 도는 "살아있는" 페이즈. grading/failed/loading에서는 카운트다운을 멈춘다
+// (failed에서 타이머가 계속 돌면 grading↔failed 진동을 유발한다).
+const LIVE_PHASES: AttemptState['phase'][] = ['chatting', 'waiting', 'confirming'];
+const isLivePhase = (phase: AttemptState['phase']) => LIVE_PHASES.includes(phase);
+
 export function useAttempt(
   problemId: number,
   onGraded: (attemptId: number) => void,
@@ -39,35 +44,37 @@ export function useAttempt(
   const draftTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pollTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
-  const beginResultPolling = useCallback(
-    (attemptId: number) => {
-      setState((s) => ({ ...s, phase: 'grading' }));
-      pollTimerRef.current = setInterval(async () => {
-        try {
-          const result = await getAttemptResult(attemptId);
-          if (result.status === 'GRADED') {
-            clearInterval(pollTimerRef.current);
-            onGraded(attemptId);
-          } else if (result.status === 'GRADING_FAILED') {
-            // 채점 실패 확정 — 폴링을 멈추고 재채점 UI로 전환
-            clearInterval(pollTimerRef.current);
-            setState((s) => ({ ...s, phase: 'failed' }));
-          }
-        } catch (err) {
-          if (err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_FOUND') {
-            // 응시가 사라짐(서버 초기화 등) — 폴링을 멈추고 이탈 처리
-            clearInterval(pollTimerRef.current);
-            onStartBlockedRef.current?.(err.message);
-          }
-          /* 그 외 일시 오류는 다음 폴링에서 재시도 */
-        }
-      }, RESULT_POLL_MS);
-    },
-    [onGraded]
-  );
-
+  // 콜백을 ref로 안정화 — 이걸 deps에 두면 매 렌더마다 이펙트가 재생성되어 카운트다운이 리셋된다
+  const onGradedRef = useRef(onGraded);
+  onGradedRef.current = onGraded;
   const onStartBlockedRef = useRef(onStartBlocked);
   onStartBlockedRef.current = onStartBlocked;
+
+  // 폴링 시작. 기존 interval을 먼저 정리해 중복 호출 시 interval이 새는 것을 막는다.
+  const beginResultPolling = useCallback((attemptId: number) => {
+    clearInterval(pollTimerRef.current);
+    setState((s) => ({ ...s, phase: 'grading' }));
+    pollTimerRef.current = setInterval(async () => {
+      try {
+        const result = await getAttemptResult(attemptId);
+        if (result.status === 'GRADED') {
+          clearInterval(pollTimerRef.current);
+          onGradedRef.current(attemptId);
+        } else if (result.status === 'GRADING_FAILED') {
+          // 채점 실패 확정 — 폴링을 멈추고 재채점 UI로 전환
+          clearInterval(pollTimerRef.current);
+          setState((s) => ({ ...s, phase: 'failed' }));
+        }
+      } catch (err) {
+        if (err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_FOUND') {
+          // 응시가 사라짐(서버 초기화 등) — 폴링을 멈추고 이탈 처리
+          clearInterval(pollTimerRef.current);
+          onStartBlockedRef.current?.(err.message);
+        }
+        /* 그 외 일시 오류는 다음 폴링에서 재시도 */
+      }
+    }, RESULT_POLL_MS);
+  }, []);
 
   // 시작 + 새로고침 복원 (서버 스냅샷이 대화·draft·남은 시간까지 내려줌)
   useEffect(() => {
@@ -107,21 +114,35 @@ export function useAttempt(
     };
   }, [problemId, beginResultPolling]);
 
-  // 타이머: 0이 되면 서버가 자동 제출하므로(다음 요청 시) 채점 폴링으로 전환
+  // 카운트다운: 살아있는 페이즈에서 1초마다 순수 감소만 한다(부작용 없음).
+  // deps는 phase만 — 콜백을 넣지 않아 매 렌더 리셋되지 않는다.
   useEffect(() => {
-    if (state.phase === 'grading' || state.phase === 'loading') return;
+    if (!isLivePhase(state.phase)) return;
     const t = setInterval(() => {
-      setState((s) => {
-        if (s.remainingSeconds <= 1) {
-          if (s.attemptId) startAttempt(problemId).catch(() => {}); // 서버 만료 처리 트리거
-          if (s.attemptId) beginResultPolling(s.attemptId);
-          return { ...s, remainingSeconds: 0 };
-        }
-        return { ...s, remainingSeconds: s.remainingSeconds - 1 };
-      });
+      setState((s) =>
+        s.remainingSeconds <= 0
+          ? s
+          : { ...s, remainingSeconds: s.remainingSeconds - 1 }
+      );
     }, 1000);
     return () => clearInterval(t);
-  }, [state.phase, problemId, beginResultPolling]);
+  }, [state.phase]);
+
+  // 만료 처리: 남은 시간이 0이 되면 서버에 만료를 트리거하고 채점 폴링으로 전환한다.
+  // beginResultPolling이 phase를 grading으로 바꾸면 isLivePhase가 false가 되어 한 번만 실행된다.
+  useEffect(() => {
+    if (state.remainingSeconds > 0) return;
+    if (!isLivePhase(state.phase) || !state.attemptId) return;
+    // start 재호출로 서버가 만료된 세션을 자동 제출하게 한다(백엔드 expireIfNeeded 경로).
+    startAttempt(problemId).catch(() => {});
+    beginResultPolling(state.attemptId);
+  }, [
+    state.remainingSeconds,
+    state.phase,
+    state.attemptId,
+    problemId,
+    beginResultPolling,
+  ]);
 
   const send = useCallback(
     async (content: string) => {
@@ -200,13 +221,19 @@ export function useAttempt(
       await submitAttempt(state.attemptId);
       toast.success('제출이 완료되었습니다. 채점을 시작할게요.');
     } catch (err) {
-      if (!(err instanceof ApiError)) {
-        // 네트워크 단절 등 — 제출이 접수되지 않았으므로 폴링에 들어가면 무한 대기가 된다
-        toast.error('제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.');
+      // 만료 자동제출로 이미 GRADING인 경우(ATTEMPT_NOT_IN_PROGRESS)만 폴링으로 수렴시킨다.
+      // 그 외(401/500/네트워크 등)는 제출이 접수되지 않았으므로 폴링에 들어가면 무한 대기가 된다.
+      const alreadySubmitted =
+        err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_IN_PROGRESS';
+      if (!alreadySubmitted) {
+        toast.error(
+          err instanceof ApiError
+            ? err.message
+            : '제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.'
+        );
         setState((s) => ({ ...s, phase: 'chatting' }));
         return;
       }
-      /* 이미 만료로 자동 제출된 경우(ATTEMPT_NOT_IN_PROGRESS)는 폴링으로 수렴 */
     }
     beginResultPolling(state.attemptId);
   }, [state.attemptId, state.draft, beginResultPolling]);
