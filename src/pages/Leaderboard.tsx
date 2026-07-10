@@ -1,34 +1,123 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import Topbar from '../components/Topbar';
 import StatCard from '../components/StatCard';
 import Tabs from '../components/Tabs';
 import RankingTable from '../components/RankingTable';
-import {
-  dummyTopStats,
-  dummyOverallRanking,
-  dummyProblems,
-  getProblemRanking,
-} from '../data/dummyLeaderboard';
 import Select from '@/components/ui/Select.tsx';
-
-const dummyUser = { name: '김지수', plan: 'FREE' as const };
+import { ApiError } from '@/lib/api/client';
+import {
+  fetchLeaderboard,
+  type Leaderboard as LeaderboardData,
+} from '@/lib/api/leaderboard';
+import { fetchProblems } from '@/lib/api/problems';
+import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
+import type { ProblemSummary } from '@/types/problem';
 
 type TabKey = 'overall' | 'byProblem';
 
 export default function Leaderboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overall');
-  const [selectedProblemId, setSelectedProblemId] = useState<string>(
-    dummyProblems[0]?.id ?? ''
+  const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [problems, setProblems] = useState<ProblemSummary[]>([]);
+  const [selectedProblemId, setSelectedProblemId] = useState<number | null>(
+    null,
   );
-  const problemRanking = getProblemRanking(selectedProblemId);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
+  const [ready, setReady] = useState(false);
+
+  // 초기 로드: profile + problems (실패 시 케이스 B)
+  useEffect(() => {
+    Promise.all([fetchMyProfile(), fetchProblems()])
+      .then(([p, probs]) => {
+        setProfile(p);
+        setProblems(probs);
+        const firstProblem = probs[0];
+        if (firstProblem) setSelectedProblemId(firstProblem.id);
+        setReady(true);
+      })
+      .catch(() => {
+        toast.error('랭킹을 불러오지 못했습니다.');
+        navigate('/', { replace: true });
+      });
+  }, [navigate]);
+
+  // 랭킹 페칭: activeTab / selectedProblemId 변화마다
+  useEffect(() => {
+    if (!ready) return;
+    if (activeTab === 'byProblem' && selectedProblemId === null) return;
+
+    let canceled = false;
+    setLeaderboard(null); // 탭 전환 중 통계 카드 "—"로 리셋
+
+    const params =
+      activeTab === 'byProblem'
+        ? { problemId: selectedProblemId as number }
+        : undefined;
+
+    fetchLeaderboard(params)
+      .then((lb) => {
+        if (!canceled) setLeaderboard(lb);
+      })
+      .catch((err: unknown) => {
+        if (canceled) return;
+        if (activeTab === 'overall') {
+          // 케이스 B — 전체 랭킹은 페이지 핵심
+          toast.error('랭킹을 불러오지 못했습니다.');
+          navigate('/', { replace: true });
+        } else {
+          // 케이스 A — 문제별 랭킹은 백엔드 message 우선
+          toast.error(
+            err instanceof ApiError
+              ? err.message
+              : '랭킹을 불러오지 못했습니다.',
+          );
+        }
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [activeTab, selectedProblemId, ready, navigate]);
+
+  if (!ready || !profile) {
+    return (
+      <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+        <Topbar active="leaderboard" userName="" plan="FREE" />
+        <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">
+          <p className="text-[13px] text-santas-gray">불러오는 중…</p>
+        </main>
+      </div>
+    );
+  }
+
+  const stats = leaderboard?.stats ?? null;
+  const rows = leaderboard?.rows ?? [];
+
+  const avgAttemptsText =
+    stats?.avgTopAttempts !== null && stats?.avgTopAttempts !== undefined
+      ? `${stats.avgTopAttempts}회`
+      : '—';
+  const avgTokensText =
+    stats?.avgTopTokens !== null && stats?.avgTopTokens !== undefined
+      ? stats.avgTopTokens.toLocaleString()
+      : '—';
+  const myRankValue =
+    stats?.myRank !== null && stats?.myRank !== undefined
+      ? String(stats.myRank)
+      : '—';
+  const myRankSuffix =
+    stats?.myRank !== null && stats?.myRank !== undefined ? '위' : undefined;
+  const myRankSub =
+    stats?.myPercentile !== null && stats?.myPercentile !== undefined
+      ? `상위 ${stats.myPercentile}%`
+      : '집계 없음';
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar
-        active="leaderboard"
-        userName={dummyUser.name}
-        plan={dummyUser.plan}
-      />
+      <Topbar active="leaderboard" userName={profile.nickname} plan="FREE" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">
         <h1 className="text-xl font-bold text-gallery">리더보드</h1>
@@ -45,21 +134,21 @@ export default function Leaderboard() {
         <section className="flex gap-3.5">
           <StatCard
             label="상위 10명 평균 시도 횟수"
-            value={`${dummyTopStats.avgTopAttempts}회`}
+            value={avgAttemptsText}
             sub="3회 제한 기준"
             accent
           />
           <StatCard
             label="상위 10명 평균 토큰 사용량"
-            value={dummyTopStats.avgTopTokens.toLocaleString()}
+            value={avgTokensText}
             sub="문제당 누적"
             accent
           />
           <StatCard
-            label="내 전체 순위"
-            value={String(dummyTopStats.myRank)}
-            valueSuffix="위"
-            sub={`상위 ${dummyTopStats.myPercentile}%`}
+            label="내 순위"
+            value={myRankValue}
+            valueSuffix={myRankSuffix}
+            sub={myRankSub}
           />
         </section>
 
@@ -72,7 +161,13 @@ export default function Leaderboard() {
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
-              <RankingTable entries={dummyOverallRanking} />
+              {leaderboard ? (
+                <RankingTable entries={rows} />
+              ) : (
+                <p className="px-5 py-6 text-[13px] text-santas-gray">
+                  불러오는 중…
+                </p>
+              )}
             </div>
           </div>
         ) : (
@@ -84,22 +179,27 @@ export default function Leaderboard() {
                   선택한 문제 기준 상위 랭킹
                 </div>
               </div>
-              {/* TODO: 백엔드 연동 후 실제 문제 목록/문제별 랭킹 API로 교체 */}
               <Select
                 variant="form"
                 className="w-56"
-                value={selectedProblemId}
-                onChange={(e) => setSelectedProblemId(e.target.value)}
+                value={selectedProblemId !== null ? String(selectedProblemId) : ''}
+                onChange={(e) => setSelectedProblemId(Number(e.target.value))}
               >
-                {dummyProblems.map((p) => (
-                  <option key={p.id} value={p.id} className="bg-mirage text-gallery">
-                    {p.name}
+                {problems.map((p) => (
+                  <option key={p.id} value={String(p.id)} className="bg-mirage text-gallery">
+                    {p.title}
                   </option>
                 ))}
               </Select>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
-              <RankingTable entries={problemRanking} />
+              {leaderboard ? (
+                <RankingTable entries={rows} />
+              ) : (
+                <p className="px-5 py-6 text-[13px] text-santas-gray">
+                  불러오는 중…
+                </p>
+              )}
             </div>
           </div>
         )}
