@@ -19,7 +19,7 @@ export interface RubricCriterionData {
     | { type: 'score'; earned: number; max: number }
     | { type: 'status'; label: string };
   description: string;
-  note: { icon: string; text: string; tone: 'default' | 'warning' };
+  note?: { icon: string; text: string; tone: 'default' | 'warning' };
 }
 
 export interface AttemptRecord {
@@ -27,8 +27,8 @@ export interface AttemptRecord {
   label: string;
   time: string;
   prompt: string;
-  inTokens: number;
-  outTokens: number;
+  inTokens?: number; // 백엔드는 교환당 총계만 집계 — in/out은 더미 전용
+  outTokens?: number;
   totalTokens: number;
   isFinal?: boolean;
 }

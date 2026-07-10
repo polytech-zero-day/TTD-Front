@@ -20,20 +20,22 @@ export default function RubricItem({ data }: RubricItemProps) {
 
       <p className="text-sm text-gallery leading-relaxed">{description}</p>
 
-      <div
-        className={`flex items-start gap-2 px-3.5 py-2 rounded ${
-          note.tone === 'warning'
-            ? 'bg-amber-400/[0.08] border-l-[3px] border-amber-500'
-            : 'bg-wedgewood/[0.08] border-l-[3px] border-wedgewood'
-        }`}
-      >
-        <span className="text-xs shrink-0">{note.icon}</span>
-        <span
-          className={`text-xs ${note.tone === 'warning' ? 'text-amber-300' : 'text-santas-gray'}`}
+      {note && (
+        <div
+          className={`flex items-start gap-2 px-3.5 py-2 rounded ${
+            note.tone === 'warning'
+              ? 'bg-amber-400/[0.08] border-l-[3px] border-amber-500'
+              : 'bg-wedgewood/[0.08] border-l-[3px] border-wedgewood'
+          }`}
         >
-          {note.text}
-        </span>
-      </div>
+          <span className="text-xs shrink-0">{note.icon}</span>
+          <span
+            className={`text-xs ${note.tone === 'warning' ? 'text-amber-300' : 'text-santas-gray'}`}
+          >
+            {note.text}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

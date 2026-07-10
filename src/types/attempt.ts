@@ -8,6 +8,8 @@ export interface ChatMessage {
   id: number | string; // 서버는 number, 낙관적 렌더링용 임시 메시지는 string
   role: 'user' | 'assistant';
   content: string;
+  tokensUsed?: number; // 이 교환에 든 총 토큰 — assistant 메시지에만 기록 (리포트용)
+  createdAt?: string;
 }
 
 export interface AttemptUsage {

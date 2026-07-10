@@ -24,7 +24,7 @@ export default function AttemptPage() {
     confirmSubmit,
     setDraft,
     retryGrading,
-  } = useAttempt(problemId, () => navigate(`/problems/${problemId}/report`));
+  } = useAttempt(problemId, (attemptId) => navigate(`/result/${attemptId}`));
 
   useEffect(() => {
     // 존재하지 않거나 비활성 문제(404)면 카탈로그로 돌려보낸다
