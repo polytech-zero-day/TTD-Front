@@ -1,11 +1,13 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import Topbar from '../components/Topbar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import { dummyProblemDetails, dummyViewer } from '../data/dummyProblems';
+import { dummyViewer } from '../data/dummyProblems';
+import { fetchProblem } from '@/lib/api/problems';
 import {
   PROBLEM_TYPE_LABEL,
-  type ProblemDetailView,
+  type ProblemDetail as ProblemDetailData,
   type SourceType,
 } from '../types/problem';
 
@@ -37,14 +39,13 @@ function BulletSection({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function ProblemDetail({ problem }: { problem: ProblemDetailView }) {
+function ProblemDetail({ problem }: { problem: ProblemDetailData }) {
   const {
     id,
     title,
     difficulty,
     type,
     maxAttempts,
-    attemptCount,
     sourceType,
     description,
     requirements,
@@ -74,8 +75,7 @@ function ProblemDetail({ problem }: { problem: ProblemDetailView }) {
           </div>
           <h1 className="text-[28px] font-bold text-gallery">{title}</h1>
           <div className="text-xs text-santas-gray">
-            누적 응시 {attemptCount.toLocaleString('ko-KR')}명 · 최대{' '}
-            {maxAttempts}회 응시
+            최대 {maxAttempts}회 응시
           </div>
         </div>
 
@@ -169,7 +169,14 @@ function NotFound() {
 
 export default function ProblemDetailPage() {
   const { id } = useParams();
-  const problem = id ? dummyProblemDetails[Number(id)] : undefined;
+  const [problem, setProblem] = useState<ProblemDetailData | null>(null);
+  const [notFound, setNotFound] = useState(false); // 미존재·비공개 문제(404) 포함 조회 실패
+
+  useEffect(() => {
+    fetchProblem(Number(id))
+      .then(setProblem)
+      .catch(() => setNotFound(true));
+  }, [id]);
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
@@ -178,7 +185,17 @@ export default function ProblemDetailPage() {
         userName={dummyViewer.name}
         plan={dummyViewer.plan}
       />
-      {problem ? <ProblemDetail problem={problem} /> : <NotFound />}
+      {notFound ? (
+        <NotFound />
+      ) : problem === null ? (
+        <main className="mx-auto flex w-full max-w-[880px] items-center justify-center px-5 py-24">
+          <span className="text-sm text-santas-gray">
+            문제 정보를 불러오는 중…
+          </span>
+        </main>
+      ) : (
+        <ProblemDetail problem={problem} />
+      )}
     </div>
   );
 }
