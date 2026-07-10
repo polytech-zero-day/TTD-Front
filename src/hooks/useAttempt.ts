@@ -27,7 +27,11 @@ const INITIAL: AttemptState = {
 const DRAFT_SAVE_DELAY_MS = 2000;
 const RESULT_POLL_MS = 3000;
 
-export function useAttempt(problemId: number, onGraded: (attemptId: number) => void) {
+export function useAttempt(
+  problemId: number,
+  onGraded: (attemptId: number) => void,
+  onStartBlocked?: (message: string) => void
+) {
   const [state, setState] = useState<AttemptState>(INITIAL);
   const startedRef = useRef(false);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -55,6 +59,9 @@ export function useAttempt(problemId: number, onGraded: (attemptId: number) => v
     [onGraded]
   );
 
+  const onStartBlockedRef = useRef(onStartBlocked);
+  onStartBlockedRef.current = onStartBlocked;
+
   // 시작 + 새로고침 복원 (서버 스냅샷이 대화·draft·남은 시간까지 내려줌)
   useEffect(() => {
     if (startedRef.current) return;
@@ -79,6 +86,13 @@ export function useAttempt(problemId: number, onGraded: (attemptId: number) => v
         remainingSeconds: snap.remainingSeconds,
         draft: snap.draft ?? '',
       });
+    }).catch((err: unknown) => {
+      // 응시 횟수 소진(QUOTA_EXCEEDED) 등 시작 불가 — 호출부에서 안내 후 이탈 처리
+      onStartBlockedRef.current?.(
+        err instanceof Error && err.message
+          ? err.message
+          : '응시를 시작할 수 없습니다.'
+      );
     });
     return () => {
       clearTimeout(draftTimerRef.current);
