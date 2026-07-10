@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAttempt } from './useAttempt';
+import { ApiError } from '@/lib/api/client';
 import {
   getAttemptResult,
   regradeAttempt,
@@ -155,6 +156,52 @@ describe('useAttempt', () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
     expect(getResultMock).not.toHaveBeenCalled(); // 폴링 미시작
+  });
+
+  it('제출이 401 등 업무 오류로 실패하면 폴링하지 않고 대화 상태로 복귀한다', async () => {
+    vi.useFakeTimers();
+    saveDraftMock.mockResolvedValue(undefined);
+    submitMock.mockRejectedValue(new ApiError('인증이 필요합니다.', 'UNAUTHENTICATED'));
+    const { result } = renderHook(() => useAttempt(1, vi.fn()));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await result.current.confirmSubmit();
+    });
+
+    expect(result.current.state.phase).toBe('chatting');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(getResultMock).not.toHaveBeenCalled();
+  });
+
+  it('만료 자동제출로 이미 GRADING인 경우(ATTEMPT_NOT_IN_PROGRESS)는 폴링으로 수렴한다', async () => {
+    vi.useFakeTimers();
+    saveDraftMock.mockResolvedValue(undefined);
+    submitMock.mockRejectedValue(
+      new ApiError('진행 중인 응시가 아닙니다.', 'ATTEMPT_NOT_IN_PROGRESS')
+    );
+    getResultMock.mockResolvedValue({
+      attemptId: 7, status: 'GRADED',
+      rubricScore: 80, efficiencyScore: 90, feedback: 'ok',
+    });
+    const onGraded = vi.fn();
+    const { result } = renderHook(() => useAttempt(1, onGraded));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await result.current.confirmSubmit();
+    });
+    expect(result.current.state.phase).toBe('grading'); // 폴링 진입
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(onGraded).toHaveBeenCalledTimes(1);
   });
 
   it('재진입 시 이미 제출된 세션이면 바로 채점 폴링으로 넘어간다', async () => {
