@@ -1,6 +1,7 @@
 // src/pages/AttemptPage.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { toast } from 'sonner';
 import AttemptTopbar from '@/components/feature/attempt/AttemptTopbar';
 import ProblemPanel from '@/components/feature/attempt/ProblemPanel';
 import ChatPanel from '@/components/feature/attempt/ChatPanel';
@@ -24,7 +25,15 @@ export default function AttemptPage() {
     confirmSubmit,
     setDraft,
     retryGrading,
-  } = useAttempt(problemId, (attemptId) => navigate(`/result/${attemptId}`));
+  } = useAttempt(
+    problemId,
+    (attemptId) => navigate(`/result/${attemptId}`),
+    (message) => {
+      // 응시 횟수 소진 등 시작 거부 — 안내 후 문제 상세로 돌려보낸다
+      toast.error(message);
+      navigate(`/problems/${problemId}`, { replace: true });
+    }
+  );
 
   useEffect(() => {
     // 존재하지 않거나 비활성 문제(404)면 카탈로그로 돌려보낸다

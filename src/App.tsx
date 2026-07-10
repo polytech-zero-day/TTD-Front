@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
+import { Toaster } from 'sonner';
 import AuthPage from './pages/AuthPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
@@ -18,6 +19,7 @@ import PaymentCompletePage from './pages/PaymentCompletePage';
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster theme="dark" position="top-center" richColors />
       <Routes>
         <Route path="/" element={<ProblemListPage />} />
         <Route path="/problems" element={<ProblemListPage />} />
