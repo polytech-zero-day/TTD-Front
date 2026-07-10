@@ -1,35 +1,108 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import Topbar from '../components/Topbar';
 import StatCard from '../components/StatCard';
-import ScatterPlot from '../components/ScatterPlot';
+import ScatterPlot, {
+  type ScatterPoint as ChartPoint,
+} from '../components/ScatterPlot';
 import Avatar from '../components/ui/Avatar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
 import {
-  dummyUser,
-  dummyStats,
-  dummyHistory,
-  dummyScatterPoints,
-} from '../data/dummyMyPage';
+  fetchMyAttempts,
+  fetchMyStats,
+  fetchScatterData,
+  type MyAttemptStats,
+  type MyAttemptSummary,
+  type ScatterPoint as ApiScatterPoint,
+} from '@/lib/api/myPage';
+
+interface MyPageData {
+  profile: MyProfile;
+  attempts: MyAttemptSummary[];
+  stats: MyAttemptStats;
+  scatter: ApiScatterPoint[];
+}
+
+const fmtScore = (n: number | null) => (n === null ? '—' : n.toFixed(1));
+const fmtDate = (iso: string | null) => (iso ? iso.slice(0, 10) : null);
+const statusLabel = (s: MyAttemptSummary['status']) =>
+  s === 'GRADED' ? '완료' : '진행중';
 
 export default function MyPage() {
+  const navigate = useNavigate();
+  const [data, setData] = useState<MyPageData | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetchMyProfile(),
+      fetchMyAttempts(),
+      fetchMyStats(),
+      fetchScatterData(),
+    ])
+      .then(([profile, attempts, stats, scatter]) => {
+        setData({ profile, attempts, stats, scatter });
+      })
+      .catch(() => {
+        toast.error('마이페이지 정보를 불러오지 못했습니다.');
+        navigate('/', { replace: true });
+      });
+  }, [navigate]);
+
+  if (!data) {
+    return (
+      <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+        <Topbar active="mypage" userName="" plan="FREE" />
+        <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-[22px] px-5 pt-8 pb-20">
+          <p className="text-[13px] text-santas-gray">불러오는 중…</p>
+        </main>
+      </div>
+    );
+  }
+
+  const { profile, attempts, stats, scatter } = data;
+
+  const joinedAt = fmtDate(profile.createdAt) ?? '—';
+  const lastAttemptAt =
+    fmtDate(attempts.find((a) => a.submittedAt)?.submittedAt ?? null) ?? '없음';
+  const distinctProblems = new Set(attempts.map((a) => a.problemId)).size;
+
+  const scatterForChart: ChartPoint[] = [
+    ...scatter.map((p) => ({
+      quality: p.rubricScore,
+      efficiency: p.efficiencyScore,
+    })),
+    ...(stats.avgQualityScore !== null && stats.avgEfficiencyScore !== null
+      ? [
+          {
+            quality: stats.avgQualityScore,
+            efficiency: stats.avgEfficiencyScore,
+            isCurrentUser: true,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar active="mypage" userName={dummyUser.name} plan={dummyUser.plan} />
+      <Topbar active="mypage" userName={profile.nickname} plan="FREE" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-[22px] px-5 pt-8 pb-20">
         {/* 프로필 패널 */}
         <section className="flex items-center gap-[18px] rounded-xl border border-gallery-9 bg-mirage p-[22px] shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
-          <Avatar initial={dummyUser.name.charAt(0)} size="lg" />
+          <Avatar initial={profile.nickname.charAt(0)} size="lg" />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-gallery">
-                {dummyUser.name}
+                {profile.nickname}
               </span>
-              <Badge tone="pill">{dummyUser.plan}</Badge>
+              <Badge tone="pill">FREE</Badge>
             </div>
             <div className="text-base text-santas-gray">
-              가입일 {dummyUser.joinedAt} · 총 제출 {dummyUser.totalSubmissions}
-              회 · 최근 응시 {dummyUser.lastAttemptAt}
+              가입일 {joinedAt} · 총 제출 {stats.totalAttempts}회 · 최근 응시{' '}
+              {lastAttemptAt}
             </div>
           </div>
           <Button
@@ -45,24 +118,24 @@ export default function MyPage() {
         <section className="flex gap-3.5">
           <StatCard
             label="평균 품질 점수"
-            value={dummyStats.avgQualityScore.toFixed(1)}
-            sub="최근 10회 기준"
+            value={fmtScore(stats.avgQualityScore)}
+            sub="전체 평균"
             accent
           />
           <StatCard
             label="평균 효율 점수"
-            value={dummyStats.avgEfficiencyScore.toFixed(1)}
+            value={fmtScore(stats.avgEfficiencyScore)}
             sub="시도·토큰 종합"
             accent
           />
           <StatCard
             label="총 시도 횟수"
-            value={String(dummyStats.totalAttempts)}
-            sub={`${dummyUser.totalSubmissions}개 문제`}
+            value={String(stats.totalAttempts)}
+            sub={`${distinctProblems}개 문제`}
           />
           <StatCard
             label="총 토큰 사용량"
-            value={dummyStats.totalTokens}
+            value={stats.totalTokens.toLocaleString()}
             sub="입력+출력 합계"
           />
         </section>
@@ -81,7 +154,7 @@ export default function MyPage() {
               </div>
             </div>
             <div className="px-5 pb-5">
-              <ScatterPlot points={dummyScatterPoints} />
+              <ScatterPlot points={scatterForChart} />
               <div className="mt-2 flex justify-between text-[11.5px] text-santas-gray">
                 <span>← 효율성 낮음</span>
                 <span>효율성 높음 →</span>
@@ -94,51 +167,66 @@ export default function MyPage() {
               <div className="text-lg font-semibold text-gallery">
                 제출 이력
               </div>
-              <Badge tone="neutral">최근 {dummyHistory.length}건</Badge>
+              <Badge tone="neutral">최근 {attempts.length}건</Badge>
             </div>
             <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto px-5 pb-5">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
-                      문제명
-                    </th>
-                    <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
-                      제출일
-                    </th>
-                    <th className="sticky top-0 bg-mirage px-3.5 py-3 text-right text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
-                      품질
-                    </th>
-                    <th className="sticky top-0 bg-mirage px-3.5 py-3 text-right text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
-                      효율
-                    </th>
-                    <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
-                      상태
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dummyHistory.map((item) => (
-                    <tr key={item.id} className="hover:bg-white/[0.02]">
-                      <td className="px-3.5 py-3 text-[13.5px] text-gallery">
-                        {item.problemName}
-                      </td>
-                      <td className="px-3.5 py-3 text-[13.5px] text-gallery">
-                        {item.submittedAt}
-                      </td>
-                      <td className="px-3.5 py-3 text-right text-[13.5px] text-gallery">
-                        {item.qualityScore}
-                      </td>
-                      <td className="px-3.5 py-3 text-right text-[13.5px] text-gallery">
-                        {item.efficiencyScore}
-                      </td>
-                      <td className="px-3.5 py-3">
-                        <Badge tone="success">{item.status}</Badge>
-                      </td>
+              {attempts.length === 0 ? (
+                <p className="px-3.5 py-6 text-[13.5px] text-santas-gray">
+                  제출 이력이 없습니다.
+                </p>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
+                        문제명
+                      </th>
+                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
+                        제출일
+                      </th>
+                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-right text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
+                        품질
+                      </th>
+                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-right text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
+                        효율
+                      </th>
+                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
+                        상태
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {attempts.map((item) => (
+                      <tr
+                        key={item.attemptId}
+                        className="hover:bg-white/[0.02]"
+                      >
+                        <td className="px-3.5 py-3 text-[13.5px] text-gallery">
+                          {item.problemTitle}
+                        </td>
+                        <td className="px-3.5 py-3 text-[13.5px] text-gallery">
+                          {fmtDate(item.submittedAt) ?? '-'}
+                        </td>
+                        <td className="px-3.5 py-3 text-right text-[13.5px] text-gallery">
+                          {item.rubricScore ?? '-'}
+                        </td>
+                        <td className="px-3.5 py-3 text-right text-[13.5px] text-gallery">
+                          {item.efficiencyScore ?? '-'}
+                        </td>
+                        <td className="px-3.5 py-3">
+                          <Badge
+                            tone={
+                              item.status === 'GRADED' ? 'success' : 'neutral'
+                            }
+                          >
+                            {statusLabel(item.status)}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </section>
