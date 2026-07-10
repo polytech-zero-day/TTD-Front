@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
-import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
@@ -17,7 +16,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<ProblemListPage />} />
         <Route path="/problems" element={<ProblemListPage />} />
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
         <Route path="/login" element={<AuthPage mode="login" />} />
