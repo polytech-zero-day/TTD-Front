@@ -13,6 +13,7 @@ import GradingPage from './pages/GradingPage';
 import ResultPage from './pages/ResultPage';
 import PricingPage from './pages/PricingPage';
 import PaymentPage from './pages/PaymentPage';
+import PaymentCompletePage from './pages/PaymentCompletePage';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/payment/complete" element={<PaymentCompletePage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />

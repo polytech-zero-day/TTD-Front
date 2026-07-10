@@ -20,7 +20,7 @@ export default function PaymentPage() {
     try {
       const billingKey = await issueBillingKey();
       await subscribe(billingKey);
-      window.location.href = '/mypage';
+      window.location.href = '/payment/complete';
     } catch (err) {
       setError(
         err instanceof BillingKeyIssueError || err instanceof ApiError
