@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { toast } from 'sonner';
 import Topbar from '../components/Topbar';
 import Button from '../components/ui/Button';
 import RubricItem from '../components/feature/result/RubricItem';
@@ -23,7 +24,10 @@ export default function ResultPage() {
   useEffect(() => {
     getAttemptResult(Number(attemptId))
       .then(setResult)
-      .catch(() => navigate('/problems', { replace: true }));
+      .catch(() => {
+        toast.error('채점 결과를 불러오지 못했습니다.');
+        navigate('/problems', { replace: true });
+      });
   }, [attemptId, navigate]);
 
   // 루브릭 항목·프롬프트 이력을 기존 표시 컴포넌트의 형태로 매핑

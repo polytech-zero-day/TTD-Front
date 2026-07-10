@@ -39,7 +39,10 @@ export default function AttemptPage() {
     // 존재하지 않거나 비활성 문제(404)면 카탈로그로 돌려보낸다
     fetchProblem(problemId)
       .then(setProblem)
-      .catch(() => navigate('/problems', { replace: true }));
+      .catch(() => {
+        toast.error('문제 정보를 불러오지 못했습니다.');
+        navigate('/problems', { replace: true });
+      });
   }, [problemId, navigate]);
 
   if (!problem || state.phase === 'loading') {
