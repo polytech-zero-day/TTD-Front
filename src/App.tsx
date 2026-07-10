@@ -5,6 +5,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import ProblemManagementPage from './pages/admin/ProblemManagementPage';
+import AiModelSettingsPage from './pages/admin/AiModelSettingsPage';
 import ProblemListPage from './pages/ProblemListPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import MyPage from './pages/MyPage';
@@ -35,6 +36,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="problems" element={<ProblemManagementPage />} />
+          <Route path="ai-models" element={<AiModelSettingsPage />} />
         </Route>
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
         <Route path="/problems/:id/attempt" element={<AttemptPage />} />
