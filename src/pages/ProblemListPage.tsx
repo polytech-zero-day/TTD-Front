@@ -1,8 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Topbar from '../components/Topbar';
 import ProblemCard from '../components/ProblemCard';
-import { dummyProblems, dummyViewer } from '../data/dummyProblems';
-import { TYPE_FILTERS, type Difficulty } from '../types/problem';
+import { dummyViewer } from '../data/dummyProblems';
+import { fetchProblems } from '@/lib/api/problems';
+import {
+  TYPE_FILTERS,
+  type Difficulty,
+  type ProblemSummary,
+} from '../types/problem';
 
 type LevelFilter = 'ALL' | Difficulty;
 
@@ -41,17 +46,25 @@ export default function ProblemListPage() {
   const [level, setLevel] = useState<LevelFilter>('ALL');
   // 유형 필터: null = 전체 유형, 아니면 TYPE_FILTERS 의 label.
   const [typeLabel, setTypeLabel] = useState<string | null>(null);
+  const [problems, setProblems] = useState<ProblemSummary[] | null>(null); // null = 로딩 중
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  useEffect(() => {
+    fetchProblems()
+      .then(setProblems)
+      .catch(() => setLoadFailed(true));
+  }, []);
 
   const filtered = useMemo(() => {
     const typeFilter = typeLabel
       ? TYPE_FILTERS.find((f) => f.label === typeLabel)
       : null;
-    return dummyProblems.filter((p) => {
+    return (problems ?? []).filter((p) => {
       const levelOk = level === 'ALL' || p.difficulty === level;
       const typeOk = !typeFilter || typeFilter.match(p.type);
       return levelOk && typeOk;
     });
-  }, [level, typeLabel]);
+  }, [problems, level, typeLabel]);
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
@@ -106,8 +119,23 @@ export default function ProblemListPage() {
           </div>
         </div>
 
-        {/* 3열 카드 그리드 (gutter 24px) */}
-        {filtered.length > 0 ? (
+        {/* 로딩/실패/빈 상태 → 3열 카드 그리드 (gutter 24px) */}
+        {loadFailed ? (
+          <div className="flex flex-col items-center gap-1 py-24 text-center">
+            <div className="text-base font-semibold text-gallery">
+              문제 목록을 불러오지 못했어요
+            </div>
+            <div className="text-[13px] text-santas-gray">
+              잠시 후 새로고침해 주세요.
+            </div>
+          </div>
+        ) : problems === null ? (
+          <div className="flex items-center justify-center py-24">
+            <span className="text-sm text-santas-gray">
+              문제 목록을 불러오는 중…
+            </span>
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-3 gap-6">
             {filtered.map((problem) => (
               <ProblemCard key={problem.id} problem={problem} />
