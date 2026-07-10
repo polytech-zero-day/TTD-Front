@@ -252,7 +252,7 @@ function MessageContent({ content }: { content: string }) {
             <code
               className={`${className ?? ''} font-mono text-[12.5px] ${
                 className?.includes('language-')
-                  ? '' // 코드 블록: pre가 배경을 담당
+                  ? 'block !bg-transparent !p-0' // 코드 블록: 배경·패딩은 pre가 담당 (hljs 테마의 자체 padding·background 무력화)
                   : 'rounded bg-ebony px-1.5 py-0.5' // 인라인 코드
               }`}
               {...rest}
@@ -315,7 +315,7 @@ function CodeBlock(props: ComponentPropsWithoutRef<'pre'>) {
     <div className="group relative">
       <pre
         ref={preRef}
-        className="overflow-x-auto rounded-lg bg-ebony p-3 pr-11 font-mono text-[12.5px] leading-relaxed"
+        className="overflow-x-auto rounded-lg bg-ebony p-3 font-mono text-[12.5px] leading-relaxed"
         {...props}
       />
       <button

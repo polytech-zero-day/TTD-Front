@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AttemptRecord } from '@/data/dummyResult';
 
 interface AttemptTimelineItemProps {
@@ -7,6 +8,7 @@ interface AttemptTimelineItemProps {
 
 export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimelineItemProps) {
   const { label, time, prompt, inTokens, outTokens, totalTokens, isFinal } = attempt;
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="flex gap-4">
@@ -29,7 +31,13 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
           <span className="text-xs font-semibold text-wedgewood">{time}</span>
         </div>
 
-        <p className="text-[13px] text-gallery leading-relaxed line-clamp-1">{prompt}</p>
+        <p
+          className={`text-[13px] text-gallery leading-relaxed ${
+            expanded ? 'whitespace-pre-wrap' : 'line-clamp-1'
+          }`}
+        >
+          {prompt}
+        </p>
 
         <div className="flex items-center gap-4 text-[11px]">
           {inTokens !== undefined && (
@@ -47,9 +55,13 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
           </span>
         </div>
 
-        <a href="#" className="text-xs text-wedgewood">
-          상세 보기 →
-        </a>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="self-start cursor-pointer text-xs text-wedgewood"
+        >
+          {expanded ? '접기 ↑' : '상세 보기 →'}
+        </button>
       </div>
     </div>
   );
