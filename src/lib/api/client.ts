@@ -1,4 +1,10 @@
-import { getAccessToken } from '@/lib/auth/session';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from '@/lib/auth/session';
+import type { TokenResponse } from '@/types/auth';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
@@ -25,9 +31,44 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
   return err instanceof ApiError ? err.message : fallback;
 }
 
+// 동시에 여러 요청이 401을 받아도 refresh는 한 번만 수행하고 결과를 공유한다.
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function refreshAccessToken(): Promise<boolean> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+        const text = await res.text();
+        const body = text ? (JSON.parse(text) as ApiEnvelope<TokenResponse>) : null;
+        if (!res.ok || !body?.success || !body.data) {
+          clearTokens(); // refresh 만료·무효 → 세션 종료
+          return false;
+        }
+        setTokens(body.data);
+        return true;
+      } catch {
+        clearTokens();
+        return false;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+  }
+  return refreshInFlight;
+}
+
 export async function apiFetch<T>(
   path: string,
-  init: RequestInit = {}
+  init: RequestInit = {},
+  retried = false
 ): Promise<T> {
   const accessToken = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -38,6 +79,15 @@ export async function apiFetch<T>(
       ...init.headers,
     },
   });
+
+  // 액세스 토큰 만료(401) → refresh로 재발급 후 원 요청 1회 재시도.
+  // 인증 엔드포인트 자체(login/refresh/logout)는 루프 방지를 위해 제외한다.
+  if (res.status === 401 && !retried && !path.startsWith('/api/auth/')) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return apiFetch<T>(path, init, true);
+    }
+  }
 
   const text = await res.text();
   const body = text ? (JSON.parse(text) as ApiEnvelope<T>) : null;
