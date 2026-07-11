@@ -199,9 +199,9 @@ export default function ResultPage() {
         <section className="flex gap-7">
           <div className="flex-1 flex flex-col gap-5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
             <div>
-              <h2 className="text-xl font-bold text-gallery">품질 vs 효율성</h2>
+              <h2 className="text-xl font-bold text-gallery">내 위치 분포도</h2>
               <p className="text-sm font-medium text-santas-gray mt-2">
-                전체 응시자 대비 내 위치 · 상위 10%는 강조 표시
+                품질·효율 점수 기준
               </p>
             </div>
             <ResultScatterChart dots={scatterDots} />
