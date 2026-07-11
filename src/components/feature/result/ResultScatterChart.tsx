@@ -26,7 +26,7 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
         <span className="absolute top-[9px] left-[9px] text-[11px] text-santas-gray">
           품질 ↑
         </span>
-        <span className="absolute bottom-[9px] right-[9px] text-[11px] text-santas-gray">
+        <span className="absolute right-[9px] bottom-[9px] text-[11px] text-santas-gray">
           효율성 높음 →
         </span>
 
@@ -61,8 +61,7 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
           상위 10%
         </span>
         <span className="flex items-center gap-2.5">
-          <span className={`rounded-full ${CURRENT_DOT}`} />
-          내 위치
+          <span className={`rounded-full ${CURRENT_DOT}`} />내 위치
         </span>
       </div>
     </div>

@@ -72,28 +72,30 @@ function ProblemDetail({
   } = problem;
 
   const chip = SOURCE_TYPE_CHIP[sourceType];
-  const attemptMeta = currentAttempt && {
-    IN_PROGRESS: {
-      badge: `응시 중 · ${formatRemainingTime(currentAttempt.remainingSeconds)} 남음`,
-      action: '이어서 풀기',
-      hint: '현재 응시 세션이 유지되고 있습니다.',
-      tone: 'success' as const,
-    },
-    GRADING: {
-      badge: '채점 중',
-      action: '채점 상태 보기',
-      hint: '제출이 완료되어 채점 결과를 기다리고 있습니다.',
-      tone: 'accent' as const,
-    },
-    GRADING_FAILED: {
-      badge: '채점 실패 · 재채점 가능',
-      action: '재채점하기',
-      hint: '기존 응시를 열어 재채점을 요청할 수 있습니다.',
-      tone: 'neutral' as const,
-    },
-    GRADED: null,
-    ABANDONED: null,
-  }[currentAttempt.status];
+  const attemptMeta =
+    currentAttempt &&
+    {
+      IN_PROGRESS: {
+        badge: `응시 중 · ${formatRemainingTime(currentAttempt.remainingSeconds)} 남음`,
+        action: '이어서 풀기',
+        hint: '현재 응시 세션이 유지되고 있습니다.',
+        tone: 'success' as const,
+      },
+      GRADING: {
+        badge: '채점 중',
+        action: '채점 상태 보기',
+        hint: '제출이 완료되어 채점 결과를 기다리고 있습니다.',
+        tone: 'accent' as const,
+      },
+      GRADING_FAILED: {
+        badge: '채점 실패 · 재채점 가능',
+        action: '재채점하기',
+        hint: '기존 응시를 열어 재채점을 요청할 수 있습니다.',
+        tone: 'neutral' as const,
+      },
+      GRADED: null,
+      ABANDONED: null,
+    }[currentAttempt.status];
 
   return (
     <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
@@ -112,11 +114,15 @@ function ProblemDetail({
           <div className="flex items-center gap-2">
             <Badge tone="accent">{difficulty}</Badge>
             <Badge tone="neutral">{PROBLEM_TYPE_LABEL[type]}</Badge>
-            {attemptMeta && <Badge tone={attemptMeta.tone}>{attemptMeta.badge}</Badge>}
+            {attemptMeta && (
+              <Badge tone={attemptMeta.tone}>{attemptMeta.badge}</Badge>
+            )}
           </div>
           <h1 className="text-[28px] font-bold text-gallery">{title}</h1>
           <div className="text-xs text-santas-gray">
-            {isPaid ? 'PAID · 문제·프롬프트 횟수 무제한' : `최대 ${maxAttempts}회 응시`}
+            {isPaid
+              ? 'PAID · 문제·프롬프트 횟수 무제한'
+              : `최대 ${maxAttempts}회 응시`}
           </div>
         </div>
 
@@ -172,7 +178,8 @@ function ProblemDetail({
                 : '/login';
             }}
           >
-            {attemptMeta?.action ?? (isLoggedIn ? '응시 시작하기' : '로그인 후 응시하기')}
+            {attemptMeta?.action ??
+              (isLoggedIn ? '응시 시작하기' : '로그인 후 응시하기')}
           </Button>
           <span className="text-xs text-santas-gray">
             {attemptMeta?.hint ??
@@ -222,7 +229,9 @@ export default function ProblemDetailPage() {
   const { plan } = useCurrentUser();
   const isLoggedIn = isAuthenticated();
   const [problem, setProblem] = useState<ProblemDetailData | null>(null);
-  const [currentAttempt, setCurrentAttempt] = useState<AttemptSnapshot | null>(null);
+  const [currentAttempt, setCurrentAttempt] = useState<AttemptSnapshot | null>(
+    null
+  );
   const [notFound, setNotFound] = useState(false); // 미존재·비공개 문제(404) 포함 조회 실패
 
   useEffect(() => {

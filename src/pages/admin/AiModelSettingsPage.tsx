@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
-import {
-  fetchAiModelSettings,
-  updateAiModel,
-} from '@/lib/api/adminAiModels';
+import { fetchAiModelSettings, updateAiModel } from '@/lib/api/adminAiModels';
 import { getApiErrorMessage } from '@/lib/api/client';
 import type { AiModelSetting, AiPurpose } from '@/types/aiModel';
 
@@ -52,11 +49,11 @@ export default function AiModelSettingsPage() {
       setSettings((prev) =>
         (prev ?? []).map((s) => (s.purpose === purpose ? updated : s))
       );
-      toast.success(`${updated.label} 모델을 ${updated.model}(으)로 변경했습니다.`);
-    } catch (err) {
-      toast.error(
-        getApiErrorMessage(err, '모델 변경에 실패했습니다.')
+      toast.success(
+        `${updated.label} 모델을 ${updated.model}(으)로 변경했습니다.`
       );
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, '모델 변경에 실패했습니다.'));
     } finally {
       setSavingPurpose(null);
     }
@@ -67,8 +64,9 @@ export default function AiModelSettingsPage() {
       <header className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-bold text-gallery">AI 모델 설정</h1>
         <p className="text-sm text-santas-gray">
-          용도별 AI 모델을 지정합니다. 변경은 서버 재시작 없이 즉시 반영되며, 채점
-          모델을 바꾼 뒤에는 캘리브레이션을 재실행해 채점 품질을 확인하세요.
+          용도별 AI 모델을 지정합니다. 변경은 서버 재시작 없이 즉시 반영되며,
+          채점 모델을 바꾼 뒤에는 캘리브레이션을 재실행해 채점 품질을
+          확인하세요.
         </p>
       </header>
 

@@ -26,10 +26,7 @@ export default function ResultPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      getAttemptResult(Number(attemptId)),
-      fetchScatterData(),
-    ])
+    Promise.all([getAttemptResult(Number(attemptId)), fetchScatterData()])
       .then(([result, scatter]) => {
         if (cancelled) return;
         setData({ result, scatter });
@@ -52,7 +49,7 @@ export default function ResultPage() {
         scoreDisplay: { type: 'score', earned: c.score, max: c.maxScore },
         description: c.comment,
       })),
-    [data],
+    [data]
   );
 
   const timeline = useMemo<AttemptRecord[]>(() => {
@@ -85,7 +82,7 @@ export default function ResultPage() {
     const { result, scatter } = data;
     // 상위 10% 컷: 종합점수(quality*0.6 + efficiency*0.4) 내림차순에서 상위 10% 인덱스
     const totals = scatter.map(
-      (p) => p.rubricScore * 0.6 + p.efficiencyScore * 0.4,
+      (p) => p.rubricScore * 0.6 + p.efficiencyScore * 0.4
     );
     const sortedDesc = [...totals].sort((a, b) => b - a);
     const cutIdx = Math.max(0, Math.ceil(sortedDesc.length * 0.1) - 1);
@@ -115,7 +112,7 @@ export default function ResultPage() {
     if (scatter.length === 0) return null;
     const myTotal = result.finalScore ?? 0;
     const atOrAbove = scatter.filter(
-      (p) => p.rubricScore * 0.6 + p.efficiencyScore * 0.4 >= myTotal,
+      (p) => p.rubricScore * 0.6 + p.efficiencyScore * 0.4 >= myTotal
     ).length;
     return Math.ceil((atOrAbove * 100) / scatter.length);
   }, [data]);
@@ -123,7 +120,9 @@ export default function ResultPage() {
   if (!data) {
     return (
       <div className="flex h-screen items-center justify-center bg-ebony">
-        <span className="text-sm text-santas-gray">채점 결과를 불러오는 중…</span>
+        <span className="text-sm text-santas-gray">
+          채점 결과를 불러오는 중…
+        </span>
       </div>
     );
   }
@@ -136,7 +135,11 @@ export default function ResultPage() {
         <span className="text-sm text-santas-gray">
           아직 채점이 완료되지 않은 응시입니다.
         </span>
-        <Button variant="outline" size="sm" onClick={() => navigate('/problems')}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/problems')}
+        >
           문제 목록으로
         </Button>
       </div>
@@ -150,39 +153,45 @@ export default function ResultPage() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="catalog" />
 
-      <main className="flex flex-col gap-5 w-full max-w-[1240px] mx-auto px-10 pt-8 pb-20">
+      <main className="mx-auto flex w-full max-w-[1240px] flex-col gap-5 px-10 pt-8 pb-20">
         {/* ① 헤더 */}
         <header className="flex flex-col gap-1.5">
           <h1 className="text-2xl font-bold text-white">채점 결과</h1>
           <p className="text-base text-santas-gray">
             {result.problemTitle} · {result.difficulty}
           </p>
-          <div className="flex items-center gap-6 text-sm mt-1">
+          <div className="mt-1 flex items-center gap-6 text-sm">
             <span className="text-santas-gray">
-              문제: <span className="text-gallery font-semibold">{result.problemTitle}</span>
+              문제:{' '}
+              <span className="font-semibold text-gallery">
+                {result.problemTitle}
+              </span>
             </span>
             <span className="text-santas-gray">
-              난이도: <span className="text-gallery font-semibold">{result.difficulty}</span>
+              난이도:{' '}
+              <span className="font-semibold text-gallery">
+                {result.difficulty}
+              </span>
             </span>
             <span className="text-santas-gray">
               제출 시각:{' '}
-              <span className="text-gallery font-semibold">
+              <span className="font-semibold text-gallery">
                 {formatDateTime(result.submittedAt)}
               </span>
             </span>
             <span className="text-santas-gray">
               응시 회차:{' '}
-              <span className="text-gallery font-semibold">
+              <span className="font-semibold text-gallery">
                 {result.attemptOrdinal}/{result.maxAttempts}
               </span>
             </span>
             {result.chatModel && (
               <span className="text-santas-gray">
                 응시 모델:{' '}
-                <span className="text-gallery font-semibold">
+                <span className="font-semibold text-gallery">
                   {result.chatModel}
                 </span>
                 {result.premium && (
@@ -196,39 +205,39 @@ export default function ResultPage() {
         </header>
 
         {/* ② 채점 총평 (독립 전폭) */}
-        <section className="flex flex-col gap-5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
+        <section className="flex flex-col gap-5 rounded-xl border border-gallery-9 bg-mirage p-[25px]">
           <div>
             <h2 className="text-xl font-bold text-gallery">채점 총평</h2>
-            <p className="text-sm font-medium text-santas-gray mt-2">
+            <p className="mt-2 text-sm font-medium text-santas-gray">
               AI 루브릭 채점 — 최종 결과물과 대화 이력을 함께 평가
             </p>
           </div>
-          <p className="text-[15px] text-gallery leading-relaxed whitespace-pre-wrap">
+          <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-gallery">
             {result.feedback}
           </p>
         </section>
 
         {/* ③ 산점도 + 최종 점수 (2단) */}
         <section className="flex gap-7">
-          <div className="flex-1 flex flex-col gap-5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
+          <div className="flex flex-1 flex-col gap-5 rounded-xl border border-gallery-9 bg-mirage p-[25px]">
             <div>
               <h2 className="text-xl font-bold text-gallery">내 위치 분포도</h2>
-              <p className="text-sm font-medium text-santas-gray mt-2">
+              <p className="mt-2 text-sm font-medium text-santas-gray">
                 품질·효율 점수 기준
               </p>
             </div>
             <ResultScatterChart dots={scatterDots} />
           </div>
 
-          <div className="flex-1 flex flex-col gap-1.5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
-            <h2 className="text-xl font-bold text-gallery mb-2">최종 점수</h2>
+          <div className="flex flex-1 flex-col gap-1.5 rounded-xl border border-gallery-9 bg-mirage p-[25px]">
+            <h2 className="mb-2 text-xl font-bold text-gallery">최종 점수</h2>
 
             <ScoreRow label="품질 점수" value={result.rubricScore ?? 0} />
             <ScoreRow label="효율성 점수" value={result.efficiencyScore ?? 0} />
             <ScoreRow label="종합 점수" value={result.finalScore ?? 0} big />
             <PercentileRow percentile={percentile} />
 
-            <div className="flex flex-col gap-3.5 p-2.5 mt-auto">
+            <div className="mt-auto flex flex-col gap-3.5 p-2.5">
               <span className="text-xs font-semibold tracking-[0.88px] text-santas-gray uppercase">
                 참고
               </span>
@@ -245,8 +254,10 @@ export default function ResultPage() {
 
         {/* ④ 루브릭 항목별 점수 */}
         {rubricItems.length > 0 && (
-          <section className="flex flex-col gap-4 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
-            <h2 className="text-xl font-bold text-gallery">루브릭 항목별 점수</h2>
+          <section className="flex flex-col gap-4 rounded-xl border border-gallery-9 bg-mirage p-[25px]">
+            <h2 className="text-xl font-bold text-gallery">
+              루브릭 항목별 점수
+            </h2>
             {rubricItems.map((item) => (
               <RubricItem key={item.id} data={item} />
             ))}
@@ -254,10 +265,14 @@ export default function ResultPage() {
         )}
 
         {/* ⑤ 프롬프트 제출 이력 */}
-        <section className="flex flex-col gap-1.5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
+        <section className="flex flex-col gap-1.5 rounded-xl border border-gallery-9 bg-mirage p-[25px]">
           <div className="mb-2">
-            <h2 className="text-xl font-bold text-gallery">프롬프트 제출 이력</h2>
-            <p className="text-sm text-santas-gray mt-1">각 프롬프트와 토큰 사용량</p>
+            <h2 className="text-xl font-bold text-gallery">
+              프롬프트 제출 이력
+            </h2>
+            <p className="mt-1 text-sm text-santas-gray">
+              각 프롬프트와 토큰 사용량
+            </p>
           </div>
 
           {timeline.length > 0 ? (
@@ -271,12 +286,12 @@ export default function ResultPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-santas-gray py-4">
+            <p className="py-4 text-sm text-santas-gray">
               AI와 주고받은 대화 없이 제출된 응시입니다.
             </p>
           )}
 
-          <div className="flex items-center justify-between p-4 bg-wedgewood/[0.08] border border-wedgewood rounded-lg">
+          <div className="flex items-center justify-between rounded-lg border border-wedgewood bg-wedgewood/[0.08] p-4">
             <span className="text-xs text-santas-gray">누적 토큰 사용량</span>
             <span className="text-xl font-bold text-wedgewood">
               {result.totalTokens.toLocaleString()}
@@ -308,22 +323,32 @@ export default function ResultPage() {
   );
 }
 
-function ScoreRow({ label, value, big }: { label: string; value: number; big?: boolean }) {
+function ScoreRow({
+  label,
+  value,
+  big,
+}: {
+  label: string;
+  value: number;
+  big?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gallery-9">
-      <span className={`font-semibold text-gallery ${big ? 'text-lg' : 'text-base'}`}>
+    <div className="flex items-center justify-between border-b border-gallery-9 py-4">
+      <span
+        className={`font-semibold text-gallery ${big ? 'text-lg' : 'text-base'}`}
+      >
         {label}
       </span>
       <span
         className={`flex items-center gap-1 rounded-md font-bold ${
           big
-            ? 'px-5 py-2 bg-wedgewood border border-wedgewood text-white text-2xl shadow-[0_0_18px_rgba(80,140,155,0.45)]'
-            : 'px-3 py-1 bg-wedgewood/20 border border-wedgewood text-wedgewood text-sm'
+            ? 'border border-wedgewood bg-wedgewood px-5 py-2 text-2xl text-white shadow-[0_0_18px_rgba(80,140,155,0.45)]'
+            : 'border border-wedgewood bg-wedgewood/20 px-3 py-1 text-sm text-wedgewood'
         }`}
       >
         {value}
         <span
-          className={`font-normal ${big ? 'text-white/70 text-xs' : 'text-santas-gray text-[11px]'}`}
+          className={`font-normal ${big ? 'text-xs text-white/70' : 'text-[11px] text-santas-gray'}`}
         >
           /100
         </span>
@@ -334,9 +359,9 @@ function ScoreRow({ label, value, big }: { label: string; value: number; big?: b
 
 function PercentileRow({ percentile }: { percentile: number | null }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-gallery-9">
+    <div className="flex items-center justify-between border-b border-gallery-9 py-4">
       <span className="text-base font-semibold text-gallery">백분위</span>
-      <span className="px-4 py-1.5 rounded-md bg-wedgewood/25 border border-wedgewood text-wedgewood text-base font-bold">
+      <span className="rounded-md border border-wedgewood bg-wedgewood/25 px-4 py-1.5 text-base font-bold text-wedgewood">
         {percentile === null ? '—' : `상위 ${percentile}%`}
       </span>
     </div>

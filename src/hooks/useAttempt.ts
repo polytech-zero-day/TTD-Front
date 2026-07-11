@@ -33,8 +33,13 @@ const RESULT_POLL_MS = 3000;
 
 // 타이머가 도는 "살아있는" 페이즈. grading/failed/loading에서는 카운트다운을 멈춘다
 // (failed에서 타이머가 계속 돌면 grading↔failed 진동을 유발한다).
-const LIVE_PHASES: AttemptState['phase'][] = ['chatting', 'waiting', 'confirming'];
-const isLivePhase = (phase: AttemptState['phase']) => LIVE_PHASES.includes(phase);
+const LIVE_PHASES: AttemptState['phase'][] = [
+  'chatting',
+  'waiting',
+  'confirming',
+];
+const isLivePhase = (phase: AttemptState['phase']) =>
+  LIVE_PHASES.includes(phase);
 
 export function useAttempt(
   problemId: number,
@@ -50,9 +55,12 @@ export function useAttempt(
 
   // 콜백을 ref로 안정화 — 이걸 deps에 두면 매 렌더마다 이펙트가 재생성되어 카운트다운이 리셋된다
   const onGradedRef = useRef(onGraded);
-  onGradedRef.current = onGraded;
   const onStartBlockedRef = useRef(onStartBlocked);
-  onStartBlockedRef.current = onStartBlocked;
+
+  useEffect(() => {
+    onGradedRef.current = onGraded;
+    onStartBlockedRef.current = onStartBlocked;
+  }, [onGraded, onStartBlocked]);
 
   // 폴링 시작. 기존 interval을 먼저 정리해 중복 호출 시 interval이 새는 것을 막는다.
   const beginResultPolling = useCallback((attemptId: number) => {
@@ -85,35 +93,41 @@ export function useAttempt(
     if (!startRequested) return;
     if (startedRef.current) return;
     startedRef.current = true;
-    startAttempt(problemId, selectedChatModel).then((snap) => {
-      if (snap.status === 'GRADING_FAILED') {
-        // 재진입했는데 채점 실패 상태면 바로 재채점 UI로
-        setState((s) => ({ ...s, attemptId: snap.attemptId, phase: 'failed' }));
-        return;
-      }
-      if (snap.status !== 'IN_PROGRESS') {
-        // 재진입했는데 이미 제출된 세션이면 바로 채점 폴링으로
-        setState((s) => ({ ...s, attemptId: snap.attemptId }));
-        beginResultPolling(snap.attemptId);
-        return;
-      }
-      setState({
-        attemptId: snap.attemptId,
-        phase: 'chatting',
-        messages: snap.messages,
-        usage: snap.usage,
-        remainingSeconds: snap.remainingSeconds,
-        draft: snap.draft ?? '',
-        chatModel: snap.chatModel,
+    startAttempt(problemId, selectedChatModel)
+      .then((snap) => {
+        if (snap.status === 'GRADING_FAILED') {
+          // 재진입했는데 채점 실패 상태면 바로 재채점 UI로
+          setState((s) => ({
+            ...s,
+            attemptId: snap.attemptId,
+            phase: 'failed',
+          }));
+          return;
+        }
+        if (snap.status !== 'IN_PROGRESS') {
+          // 재진입했는데 이미 제출된 세션이면 바로 채점 폴링으로
+          setState((s) => ({ ...s, attemptId: snap.attemptId }));
+          beginResultPolling(snap.attemptId);
+          return;
+        }
+        setState({
+          attemptId: snap.attemptId,
+          phase: 'chatting',
+          messages: snap.messages,
+          usage: snap.usage,
+          remainingSeconds: snap.remainingSeconds,
+          draft: snap.draft ?? '',
+          chatModel: snap.chatModel,
+        });
+      })
+      .catch((err: unknown) => {
+        // 응시 횟수 소진(QUOTA_EXCEEDED) 등 시작 불가 — 호출부에서 안내 후 이탈 처리
+        onStartBlockedRef.current?.(
+          err instanceof Error && err.message
+            ? err.message
+            : '응시를 시작할 수 없습니다.'
+        );
       });
-    }).catch((err: unknown) => {
-      // 응시 횟수 소진(QUOTA_EXCEEDED) 등 시작 불가 — 호출부에서 안내 후 이탈 처리
-      onStartBlockedRef.current?.(
-        err instanceof Error && err.message
-          ? err.message
-          : '응시를 시작할 수 없습니다.'
-      );
-    });
     return () => {
       clearTimeout(draftTimerRef.current);
       clearInterval(pollTimerRef.current);
@@ -139,9 +153,14 @@ export function useAttempt(
   useEffect(() => {
     if (state.remainingSeconds > 0) return;
     if (!isLivePhase(state.phase) || !state.attemptId) return;
+    const attemptId = state.attemptId;
     // start 재호출로 서버가 만료된 세션을 자동 제출하게 한다(백엔드 expireIfNeeded 경로).
-    startAttempt(problemId).catch(() => {});
-    beginResultPolling(state.attemptId);
+    // 다음 작업으로 넘겨 effect 중 동기 상태 갱신을 피하고, cleanup 전에는 실행되지 않게 한다.
+    const expiryTask = setTimeout(() => {
+      startAttempt(problemId).catch(() => {});
+      beginResultPolling(attemptId);
+    }, 0);
+    return () => clearTimeout(expiryTask);
   }, [
     state.remainingSeconds,
     state.phase,
@@ -176,7 +195,10 @@ export function useAttempt(
         }));
       } catch (err) {
         toast.error(
-          getApiErrorMessage(err, '메시지 전송에 실패했습니다. 다시 시도해주세요.')
+          getApiErrorMessage(
+            err,
+            '메시지 전송에 실패했습니다. 다시 시도해주세요.'
+          )
         );
         setState((s) => ({
           ...s,
@@ -231,7 +253,10 @@ export function useAttempt(
         err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_IN_PROGRESS';
       if (!alreadySubmitted) {
         toast.error(
-          getApiErrorMessage(err, '제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.')
+          getApiErrorMessage(
+            err,
+            '제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.'
+          )
         );
         setState((s) => ({ ...s, phase: 'chatting' }));
         return;
@@ -250,9 +275,7 @@ export function useAttempt(
       beginResultPolling(attemptId);
     } catch (err) {
       // 실패 상태 유지 — 사용자가 다시 시도하거나 관리자 문의
-      toast.error(
-        getApiErrorMessage(err, '재채점 요청에 실패했습니다.')
-      );
+      toast.error(getApiErrorMessage(err, '재채점 요청에 실패했습니다.'));
     }
   }, [state.attemptId, state.phase, beginResultPolling]);
 

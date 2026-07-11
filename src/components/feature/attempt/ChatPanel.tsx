@@ -21,7 +21,10 @@ interface Props {
 
 function placeholderFor(state: AttemptState) {
   if (state.phase === 'waiting') return '응답을 기다리는 중….';
-  if (!state.usage.unlimited && state.usage.messagesUsed >= state.usage.messagesLimit)
+  if (
+    !state.usage.unlimited &&
+    state.usage.messagesUsed >= state.usage.messagesLimit
+  )
     return '메시지를 모두 사용했습니다';
   return 'AI에게 보낼 프롬프트를 입력하세요…';
 }
@@ -36,7 +39,8 @@ export default function ChatPanel({
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { usage, phase, messages, chatModel } = state;
-  const exhausted = !usage.unlimited && usage.messagesUsed >= usage.messagesLimit;
+  const exhausted =
+    !usage.unlimited && usage.messagesUsed >= usage.messagesLimit;
   const locked = isInputLocked(state);
 
   useEffect(() => {
@@ -170,10 +174,13 @@ export default function ChatPanel({
       <div className="shrink-0 border-t border-gallery-9 px-5 py-3">
         <div className="mb-2.5 flex items-center gap-3 text-xs text-santas-gray">
           <span>
-            메시지 {usage.messagesUsed}/{usage.unlimited ? '무제한' : usage.messagesLimit}
+            메시지 {usage.messagesUsed}/
+            {usage.unlimited ? '무제한' : usage.messagesLimit}
           </span>
           <UsageBar
-            ratio={usage.unlimited ? 0 : usage.messagesUsed / usage.messagesLimit}
+            ratio={
+              usage.unlimited ? 0 : usage.messagesUsed / usage.messagesLimit
+            }
             danger={exhausted}
           />
           <span>
