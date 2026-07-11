@@ -50,17 +50,19 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="cursor-pointer text-xs text-wedgewood"
+            className="flex items-center gap-1 cursor-pointer text-xs text-wedgewood hover:text-wedgewood/80"
           >
-            {expanded ? '접기 ↑' : '상세 보기 →'}
+            {expanded ? '프롬프트 접기' : '프롬프트 전체 보기'}
+            <ChevronDown open={expanded} />
           </button>
           {isFinal && (
             <button
               type="button"
               onClick={() => setArtifactOpen((v) => !v)}
-              className="cursor-pointer text-xs text-wedgewood"
+              className="flex items-center gap-1 cursor-pointer rounded border border-wedgewood/30 bg-wedgewood/10 px-2.5 py-1 text-xs font-semibold text-wedgewood hover:bg-wedgewood/15"
             >
-              {artifactOpen ? '제출 답변 접기 ↑' : '제출한 답변 보기 →'}
+              {artifactOpen ? '제출 답변 접기' : '제출한 답변 보기'}
+              <ChevronDown open={artifactOpen} />
             </button>
           )}
         </div>
@@ -76,5 +78,26 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
         )}
       </div>
     </div>
+  );
+}
+
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg
+      className={`transition-transform ${open ? 'rotate-180' : ''}`}
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M2.5 4.5 6 8l3.5-3.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
