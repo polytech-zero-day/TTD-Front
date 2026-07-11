@@ -28,7 +28,9 @@ describe('apiFetch', () => {
       jsonResponse({ success: true, data: { id: 1, title: '문제' } })
     );
 
-    const data = await apiFetch<{ id: number; title: string }>('/api/problems/1');
+    const data = await apiFetch<{ id: number; title: string }>(
+      '/api/problems/1'
+    );
 
     expect(data).toEqual({ id: 1, title: '문제' });
     expect(fetchMock).toHaveBeenCalledWith(
@@ -40,7 +42,6 @@ describe('apiFetch', () => {
   it('로그인 상태면 Authorization 헤더를 붙인다', async () => {
     setTokens({
       accessToken: 'token-abc',
-      refreshToken: 'r',
       tokenType: 'Bearer',
       expiresInSeconds: 1800,
     });
@@ -92,21 +93,26 @@ describe('apiFetch', () => {
   it('토큰 재발급 요청이 네트워크 오류면 기존 세션을 유지한다', async () => {
     setTokens({
       accessToken: 'expired-token',
-      refreshToken: 'refresh-token',
       tokenType: 'Bearer',
       expiresInSeconds: 1800,
     });
     fetchMock
       .mockResolvedValueOnce(
         jsonResponse(
-          { success: false, errorCode: 'UNAUTHORIZED', message: '인증이 만료되었습니다.' },
+          {
+            success: false,
+            errorCode: 'UNAUTHORIZED',
+            message: '인증이 만료되었습니다.',
+          },
           false,
           401
         )
       )
       .mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
-    await expect(apiFetch('/api/users/me')).rejects.toThrow('인증이 만료되었습니다.');
+    await expect(apiFetch('/api/users/me')).rejects.toThrow(
+      '인증이 만료되었습니다.'
+    );
 
     expect(isAuthenticated()).toBe(true);
   });

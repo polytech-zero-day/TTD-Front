@@ -39,9 +39,7 @@ export default function LoginForm() {
       await refresh(); // 헤더를 방금 로그인한 사용자로 갱신 (SPA라 리로드가 없음)
       navigate(getCurrentUserRole() === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
-      setError(
-        getApiErrorMessage(err, '로그인에 실패했습니다.')
-      );
+      setError(getApiErrorMessage(err, '로그인에 실패했습니다.'));
     } finally {
       setIsSubmitting(false);
     }

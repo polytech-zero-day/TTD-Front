@@ -33,6 +33,7 @@ const CurrentUserContext = createContext<CurrentUser>({
 });
 
 // 헤더(Topbar) 등에서 현재 로그인 사용자·요금제를 읽는다. 페이지마다 더미로 넘기던 것을 대체.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCurrentUser = () => useContext(CurrentUserContext);
 
 interface UserState {
@@ -58,7 +59,12 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated()) {
-      setUser({ name: '', plan: 'FREE', isLoading: false, connectionStatus: 'online' });
+      setUser({
+        name: '',
+        plan: 'FREE',
+        isLoading: false,
+        connectionStatus: 'online',
+      });
       return;
     }
 
@@ -67,21 +73,45 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
       profile = await fetchMyProfile();
     } catch {
       if (!isAuthenticated()) {
-        setUser({ name: '', plan: 'FREE', isLoading: false, connectionStatus: 'online' });
+        setUser({
+          name: '',
+          plan: 'FREE',
+          isLoading: false,
+          connectionStatus: 'online',
+        });
       } else {
-        setUser((current) => ({ ...current, isLoading: false, connectionStatus: 'offline' }));
+        setUser((current) => ({
+          ...current,
+          isLoading: false,
+          connectionStatus: 'offline',
+        }));
       }
       return;
     }
 
     try {
       const subscription = await fetchMySubscription();
-      const plan: UserPlan = isPaidSubscription(subscription.status) ? 'PAID' : 'FREE';
-      setUser({ name: profile.nickname, plan, isLoading: false, connectionStatus: 'online' });
+      const plan: UserPlan = isPaidSubscription(subscription.status)
+        ? 'PAID'
+        : 'FREE';
+      setUser({
+        name: profile.nickname,
+        plan,
+        isLoading: false,
+        connectionStatus: 'online',
+      });
     } catch (err) {
       // 구독 이력이 없는 404만 FREE로 판정한다. 그 외는 연결 오류로 현재 플랜을 보존한다.
-      if (err instanceof ApiError && err.errorCode === 'SUBSCRIPTION_NOT_FOUND') {
-        setUser({ name: profile.nickname, plan: 'FREE', isLoading: false, connectionStatus: 'online' });
+      if (
+        err instanceof ApiError &&
+        err.errorCode === 'SUBSCRIPTION_NOT_FOUND'
+      ) {
+        setUser({
+          name: profile.nickname,
+          plan: 'FREE',
+          isLoading: false,
+          connectionStatus: 'online',
+        });
         return;
       }
       setUser((current) => ({
@@ -94,7 +124,8 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    const task = setTimeout(() => void refresh(), 0);
+    return () => clearTimeout(task);
   }, [refresh]);
 
   return (
