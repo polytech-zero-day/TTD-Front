@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, getApiErrorMessage } from '@/lib/api/client';
 import {
   getAttemptResult,
   regradeAttempt,
@@ -170,9 +170,7 @@ export function useAttempt(
         }));
       } catch (err) {
         toast.error(
-          err instanceof ApiError
-            ? err.message
-            : '메시지 전송에 실패했습니다. 다시 시도해주세요.'
+          getApiErrorMessage(err, '메시지 전송에 실패했습니다. 다시 시도해주세요.')
         );
         setState((s) => ({
           ...s,
@@ -227,9 +225,7 @@ export function useAttempt(
         err instanceof ApiError && err.errorCode === 'ATTEMPT_NOT_IN_PROGRESS';
       if (!alreadySubmitted) {
         toast.error(
-          err instanceof ApiError
-            ? err.message
-            : '제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.'
+          getApiErrorMessage(err, '제출에 실패했습니다. 연결을 확인하고 다시 시도해주세요.')
         );
         setState((s) => ({ ...s, phase: 'chatting' }));
         return;
@@ -249,7 +245,7 @@ export function useAttempt(
     } catch (err) {
       // 실패 상태 유지 — 사용자가 다시 시도하거나 관리자 문의
       toast.error(
-        err instanceof ApiError ? err.message : '재채점 요청에 실패했습니다.'
+        getApiErrorMessage(err, '재채점 요청에 실패했습니다.')
       );
     }
   }, [state.attemptId, state.phase, beginResultPolling]);
