@@ -22,9 +22,14 @@ const CURRENT_DOT = 'h-3.5 w-3.5 bg-wedgewood shadow-[0_0_0_3px_white]';
 export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11.5px] text-santas-gray">품질 ↑</span>
-
       <div className="relative h-[340px] w-full overflow-hidden rounded-[10px] border border-gallery-9 bg-ebony">
+        <span className="absolute top-[9px] left-[9px] text-[11px] text-santas-gray">
+          품질 ↑
+        </span>
+        <span className="absolute bottom-[9px] right-[9px] text-[11px] text-santas-gray">
+          효율성 높음 →
+        </span>
+
         {dots.map((dot, index) => {
           const dotClass = dot.isCurrentPosition
             ? CURRENT_DOT
@@ -46,13 +51,6 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
         })}
       </div>
 
-      <span className="text-[11.5px] text-santas-gray">품질 ↓</span>
-
-      <div className="flex justify-between text-[11.5px] text-santas-gray">
-        <span>← 효율성 낮음</span>
-        <span>효율성 높음 →</span>
-      </div>
-
       <div className="mt-2 flex flex-wrap items-center gap-4 text-[11.5px] text-santas-gray">
         <span className="flex items-center gap-1.5">
           <span className={`rounded-full ${NORMAL_DOT}`} />
@@ -62,7 +60,7 @@ export default function ResultScatterChart({ dots }: ResultScatterChartProps) {
           <span className={`rounded-full ${TOP_TEN_DOT}`} />
           상위 10%
         </span>
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-2.5">
           <span className={`rounded-full ${CURRENT_DOT}`} />
           내 위치
         </span>
