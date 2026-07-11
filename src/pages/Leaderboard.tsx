@@ -12,7 +12,7 @@ import {
   type Leaderboard as LeaderboardData,
 } from '@/lib/api/leaderboard';
 import { fetchProblems } from '@/lib/api/problems';
-import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
+import { isAuthenticated } from '@/lib/auth/session';
 import type { ProblemSummary } from '@/types/problem';
 
 type TabKey = 'overall' | 'byProblem';
@@ -20,21 +20,20 @@ type TabKey = 'overall' | 'byProblem';
 export default function Leaderboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overall');
-  const [profile, setProfile] = useState<MyProfile | null>(null);
   const [problems, setProblems] = useState<ProblemSummary[]>([]);
   const [selectedProblemId, setSelectedProblemId] = useState<number | null>(
     null,
   );
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
   const [ready, setReady] = useState(false);
+  const isLoggedIn = isAuthenticated();
 
-  // 초기 로드: profile + problems (실패 시 케이스 B)
+  // 공개 리더보드의 문제별 필터용 문제 목록 로드.
   useEffect(() => {
     let cancelled = false;
-    Promise.all([fetchMyProfile(), fetchProblems()])
-      .then(([p, probs]) => {
+    fetchProblems()
+      .then((probs) => {
         if (cancelled) return;
-        setProfile(p);
         setProblems(probs);
         const firstProblem = probs[0];
         if (firstProblem) setSelectedProblemId(firstProblem.id);
@@ -42,8 +41,8 @@ export default function Leaderboard() {
       })
       .catch(() => {
         if (cancelled) return;
-        toast.error('랭킹을 불러오지 못했습니다.');
-        navigate('/', { replace: true });
+        toast.error('문제 목록을 불러오지 못했습니다. 전체 랭킹만 표시합니다.');
+        setReady(true);
       });
     return () => {
       cancelled = true;
@@ -86,7 +85,7 @@ export default function Leaderboard() {
     };
   }, [activeTab, selectedProblemId, ready, navigate]);
 
-  if (!ready || !profile) {
+  if (!ready) {
     return (
       <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
         <Topbar active="leaderboard" />
@@ -150,9 +149,9 @@ export default function Leaderboard() {
           />
           <StatCard
             label="내 순위"
-            value={myRankValue}
-            valueSuffix={myRankSuffix}
-            sub={myRankSub}
+            value={isLoggedIn ? myRankValue : '—'}
+            valueSuffix={isLoggedIn ? myRankSuffix : undefined}
+            sub={isLoggedIn ? myRankSub : '로그인 후 내 순위 확인'}
           />
         </section>
 

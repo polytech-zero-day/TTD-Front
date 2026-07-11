@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import Topbar from '../components/Topbar';
 import PlanCard from '../components/feature/pricing/PlanCard';
 import { plans } from '../data/dummyPricing';
 import { getMySubscription } from '@/lib/api/subscription';
 import { isPaidSubscription } from '@/lib/subscription/plan';
+import { isAuthenticated } from '@/lib/auth/session';
 import type { PlanId } from '../types/pricing';
 
 
 export default function PricingPage() {
+  const navigate = useNavigate();
   const [currentPlanId, setCurrentPlanId] = useState<PlanId | null>(null);
+  const isLoggedIn = isAuthenticated();
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     let cancelled = false;
 
     getMySubscription().then((subscription) => {
@@ -21,7 +26,7 @@ export default function PricingPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
@@ -42,16 +47,26 @@ export default function PricingPage() {
             <PlanCard
               key={plan.id}
               plan={plan}
-              isCurrent={currentPlanId !== null && plan.id === currentPlanId}
-              isActionDisabled={currentPlanId === 'PAID' && plan.id === 'FREE'}
+              isCurrent={isLoggedIn && currentPlanId !== null && plan.id === currentPlanId}
+              isActionDisabled={
+                isLoggedIn && currentPlanId === 'PAID' && plan.id === 'FREE'
+              }
               actionLabel={
-                currentPlanId === 'PAID' && plan.id === 'FREE'
+                !isLoggedIn
+                  ? plan.id === 'PAID'
+                    ? '로그인 후 업그레이드'
+                    : '무료로 시작하기'
+                  : currentPlanId === 'PAID' && plan.id === 'FREE'
                   ? '유료 플랜 이용 중'
                   : undefined
               }
               onSelect={() => {
+                if (!isLoggedIn) {
+                  navigate(plan.id === 'PAID' ? '/login' : '/signup');
+                  return;
+                }
                 if (plan.id === 'PAID' && plan.id !== currentPlanId) {
-                  window.location.href = '/payment';
+                  navigate('/payment');
                 }
               }}
             />
