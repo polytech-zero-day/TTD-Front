@@ -39,9 +39,7 @@ export default function SignupForm() {
       await signup(input);
       navigate('/login');
     } catch (err) {
-      setError(
-        getApiErrorMessage(err, '회원가입에 실패했습니다.')
-      );
+      setError(getApiErrorMessage(err, '회원가입에 실패했습니다.'));
     } finally {
       setIsSubmitting(false);
     }

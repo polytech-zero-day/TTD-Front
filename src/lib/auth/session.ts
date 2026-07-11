@@ -3,10 +3,8 @@ import type { UserRole } from '@/types/admin';
 import type { TokenResponse } from '@/types/auth';
 
 /*
- * 토큰은 새로고침 후에도 세션을 유지하기 위해 localStorage에 저장한다.
- * 트레이드오프: XSS로 스크립트가 주입되면 토큰이 노출될 수 있다(httpOnly 쿠키가 더 안전).
- * 팀 결정으로 localStorage 방식을 채택했고, 액세스 토큰 만료 시 apiFetch가 자동으로
- * /api/auth/refresh를 호출해 재발급받는다.
+ * 단기 access token만 새로고침 유지를 위해 localStorage에 저장한다.
+ * 장기 refresh token은 서버가 HttpOnly 쿠키로만 관리해 JavaScript에서 접근할 수 없다.
  */
 const STORAGE_KEY = 'ttd.tokens';
 
@@ -41,10 +39,6 @@ export function clearTokens() {
 
 export function getAccessToken(): string | null {
   return tokens?.accessToken ?? null;
-}
-
-export function getRefreshToken(): string | null {
-  return tokens?.refreshToken ?? null;
 }
 
 export function isAuthenticated(): boolean {

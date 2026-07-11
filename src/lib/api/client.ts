@@ -1,9 +1,4 @@
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-} from '@/lib/auth/session';
+import { clearTokens, getAccessToken, setTokens } from '@/lib/auth/session';
 import type { TokenResponse } from '@/types/auth';
 
 const API_BASE_URL =
@@ -35,19 +30,18 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
 let refreshInFlight: Promise<boolean> | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
-
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
+          credentials: 'include',
         });
         const text = await res.text();
-        const body = text ? (JSON.parse(text) as ApiEnvelope<TokenResponse>) : null;
+        const body = text
+          ? (JSON.parse(text) as ApiEnvelope<TokenResponse>)
+          : null;
         if (!res.ok || !body?.success || !body.data) {
           clearTokens(); // refresh 만료·무효 → 세션 종료
           return false;
@@ -73,6 +67,7 @@ export async function apiFetch<T>(
   const accessToken = getAccessToken();
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
