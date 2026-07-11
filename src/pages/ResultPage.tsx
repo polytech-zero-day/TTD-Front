@@ -18,12 +18,6 @@ interface ResultPageData {
   scatter: ScatterPoint[];
 }
 
-// AttemptResult 타입엔 아직 artifact 필드가 없어(백엔드 미포함).
-// 백엔드에서 artifact가 추가되면 이 헬퍼가 그대로 값을 반환하도록 구조만 미리 잡아둔다.
-function extractArtifact(result: AttemptResult): string | null {
-  return (result as { artifact?: string | null }).artifact ?? null;
-}
-
 export default function ResultPage() {
   const { attemptId } = useParams();
   const navigate = useNavigate();
@@ -58,7 +52,7 @@ export default function ResultPage() {
   const timeline = useMemo<AttemptRecord[]>(() => {
     if (!data) return [];
     const messages = data.result.messages ?? [];
-    const artifact = extractArtifact(data.result);
+    const artifact = data.result.artifact;
     const records: AttemptRecord[] = [];
     messages.forEach((m, i) => {
       if (m.role !== 'user') return;
