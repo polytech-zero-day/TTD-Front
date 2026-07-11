@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input';
 import { login } from '@/lib/api/auth';
 import { getApiErrorMessage } from '@/lib/api/client';
 import { getCurrentUserRole } from '@/lib/auth/session';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import type { LoginInput } from '@/types/auth';
 
 function validate(input: LoginInput): string | null {
@@ -16,6 +17,7 @@ function validate(input: LoginInput): string | null {
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { refresh } = useCurrentUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export default function LoginForm() {
     setIsSubmitting(true);
     try {
       await login(input);
+      await refresh(); // 헤더를 방금 로그인한 사용자로 갱신 (SPA라 리로드가 없음)
       navigate(getCurrentUserRole() === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
       setError(
