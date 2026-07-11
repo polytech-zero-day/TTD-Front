@@ -20,6 +20,11 @@ export class ApiError extends Error {
   }
 }
 
+/** ApiError면 서버 메시지를, 아니면 fallback을 반환한다. 사용자 안내 문구 추출 공용 헬퍼. */
+export function getApiErrorMessage(err: unknown, fallback: string): string {
+  return err instanceof ApiError ? err.message : fallback;
+}
+
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {}

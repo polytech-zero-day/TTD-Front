@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { login } from '@/lib/api/auth';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import { getCurrentUserRole } from '@/lib/auth/session';
 import type { LoginInput } from '@/types/auth';
 
@@ -37,7 +37,7 @@ export default function LoginForm() {
       navigate(getCurrentUserRole() === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : '로그인에 실패했습니다.'
+        getApiErrorMessage(err, '로그인에 실패했습니다.')
       );
     } finally {
       setIsSubmitting(false);

@@ -6,7 +6,7 @@ import StatCard from '../components/StatCard';
 import Tabs from '../components/Tabs';
 import RankingTable from '../components/RankingTable';
 import Select from '@/components/ui/Select.tsx';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import {
   fetchLeaderboard,
   type Leaderboard as LeaderboardData,
@@ -70,9 +70,7 @@ export default function Leaderboard() {
         } else {
           // 케이스 A — 문제별 랭킹은 백엔드 message 우선
           toast.error(
-            err instanceof ApiError
-              ? err.message
-              : '랭킹을 불러오지 못했습니다.',
+            getApiErrorMessage(err, '랭킹을 불러오지 못했습니다.'),
           );
         }
       });

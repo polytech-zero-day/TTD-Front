@@ -5,7 +5,7 @@ import {
   fetchAdminUsers,
   updateAdminUser,
 } from '@/lib/api/adminUsers';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import type { AdminUser, CreateAdminUserInput } from '@/types/admin';
 
 export function useAdminUsers() {
@@ -26,9 +26,7 @@ export function useAdminUsers() {
       .catch((err: unknown) => {
         if (cancelled) return;
         setError(
-          err instanceof ApiError
-            ? err.message
-            : '사용자 목록을 불러오지 못했습니다.'
+          getApiErrorMessage(err, '사용자 목록을 불러오지 못했습니다.')
         );
       })
       .finally(() => {

@@ -1,4 +1,5 @@
 import Badge from '@/components/ui/Badge';
+import { formatDate } from '@/lib/format';
 import Button from '@/components/ui/Button';
 import type { AdminUser } from '@/types/admin';
 
@@ -6,10 +7,6 @@ interface UserTableProps {
   users: AdminUser[];
   onToggleRole: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString('ko-KR');
 }
 
 export default function UserTable({

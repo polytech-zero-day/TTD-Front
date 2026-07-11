@@ -1,4 +1,5 @@
 import Badge from '@/components/ui/Badge';
+import { formatDate } from '@/lib/format';
 import Button from '@/components/ui/Button';
 import {
   PROBLEM_STATUS_LABEL,
@@ -16,10 +17,6 @@ interface AdminProblemTableProps {
 }
 
 const STATUS_OPTIONS: ProblemStatus[] = ['draft', 'pending', 'active'];
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString('ko-KR');
-}
 
 export default function AdminProblemTable({
   problems,

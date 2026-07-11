@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { signup } from '@/lib/api/auth';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import type { SignupInput } from '@/types/auth';
 
 function validate(input: SignupInput): string | null {
@@ -40,7 +40,7 @@ export default function SignupForm() {
       navigate('/login');
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : '회원가입에 실패했습니다.'
+        getApiErrorMessage(err, '회원가입에 실패했습니다.')
       );
     } finally {
       setIsSubmitting(false);

@@ -6,7 +6,7 @@ import {
   updateAdminProblem,
   updateAdminProblemStatus,
 } from '@/lib/api/adminProblems';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import type {
   AdminProblem,
   CreateProblemInput,
@@ -32,9 +32,7 @@ export function useAdminProblems() {
       .catch((err: unknown) => {
         if (cancelled) return;
         setError(
-          err instanceof ApiError
-            ? err.message
-            : '문제 목록을 불러오지 못했습니다.'
+          getApiErrorMessage(err, '문제 목록을 불러오지 못했습니다.')
         );
       })
       .finally(() => {

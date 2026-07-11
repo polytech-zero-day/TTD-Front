@@ -6,13 +6,10 @@ import Button from '../components/ui/Button';
 import RubricItem from '../components/feature/result/RubricItem';
 import AttemptTimelineItem from '../components/feature/result/AttemptTimelineItem';
 import { getAttemptResult, type AttemptResult } from '@/lib/api/attempt';
+import { formatDateTime, formatTime } from '@/lib/format';
 import type { AttemptRecord, RubricCriterionData } from '../types/result';
 
 
-// "2026-07-10T15:34:28.123" → "2026-07-10 15:34:28"
-const formatDateTime = (iso: string | null) =>
-  iso ? iso.replace('T', ' ').slice(0, 19) : '-';
-const formatTime = (iso?: string) => (iso ? iso.slice(11, 19) : '');
 
 export default function ResultPage() {
   const { attemptId } = useParams();
@@ -72,7 +69,7 @@ export default function ResultPage() {
         <span className="text-sm text-santas-gray">
           아직 채점이 완료되지 않은 응시입니다.
         </span>
-        <Button variant="outline" size="md" onClick={() => navigate('/problems')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/problems')}>
           문제 목록으로
         </Button>
       </div>

@@ -6,7 +6,7 @@ import {
   fetchAiModelSettings,
   updateAiModel,
 } from '@/lib/api/adminAiModels';
-import { ApiError } from '@/lib/api/client';
+import { getApiErrorMessage } from '@/lib/api/client';
 import type { AiModelSetting, AiPurpose } from '@/types/aiModel';
 
 // "2026-07-10T18:00:00" → "2026-07-10 18:00"
@@ -32,9 +32,7 @@ export default function AiModelSettingsPage() {
       })
       .catch((err: unknown) => {
         setLoadError(
-          err instanceof ApiError
-            ? err.message
-            : 'AI 모델 설정을 불러오지 못했습니다.'
+          getApiErrorMessage(err, 'AI 모델 설정을 불러오지 못했습니다.')
         );
       });
   }, []);
@@ -51,7 +49,7 @@ export default function AiModelSettingsPage() {
       toast.success(`${updated.label} 모델을 ${updated.model}(으)로 변경했습니다.`);
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : '모델 변경에 실패했습니다.'
+        getApiErrorMessage(err, '모델 변경에 실패했습니다.')
       );
     } finally {
       setSavingPurpose(null);
