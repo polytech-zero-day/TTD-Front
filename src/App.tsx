@@ -12,7 +12,6 @@ import ProblemDetailPage from './pages/ProblemDetailPage';
 import MyPage from './pages/MyPage';
 import Leaderboard from './pages/Leaderboard';
 import AttemptPage from './pages/AttemptPage';
-import GradingPage from './pages/GradingPage';
 import ResultPage from './pages/ResultPage';
 import PricingPage from './pages/PricingPage';
 import PaymentPage from './pages/PaymentPage';
@@ -40,9 +39,7 @@ export default function App() {
           <Route path="problems" element={<ProblemManagementPage />} />
           <Route path="ai-models" element={<AiModelSettingsPage />} />
         </Route>
-        <Route path="/problems/:id" element={<ProblemDetailPage />} />
         <Route path="/problems/:id/attempt" element={<AttemptPage />} />
-        <Route path="/grading" element={<GradingPage />} />
         <Route path="/result/:attemptId" element={<ResultPage />} />
         </Routes>
       </CurrentUserProvider>
