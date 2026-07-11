@@ -7,8 +7,9 @@ interface AttemptTimelineItemProps {
 }
 
 export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimelineItemProps) {
-  const { label, time, prompt, inTokens, outTokens, totalTokens, isFinal } = attempt;
+  const { label, time, prompt, totalTokens, isFinal, artifact } = attempt;
   const [expanded, setExpanded] = useState(false);
+  const [artifactOpen, setArtifactOpen] = useState(false);
 
   return (
     <div className="flex gap-4">
@@ -40,28 +41,39 @@ export default function AttemptTimelineItem({ attempt, isLast }: AttemptTimeline
         </p>
 
         <div className="flex items-center gap-4 text-[11px]">
-          {inTokens !== undefined && (
-            <span className="text-santas-gray">
-              IN: <span className="text-gallery font-semibold">{inTokens}</span>
-            </span>
-          )}
-          {outTokens !== undefined && (
-            <span className="text-santas-gray">
-              OUT: <span className="text-gallery font-semibold">{outTokens}</span>
-            </span>
-          )}
           <span className="text-santas-gray">
             TOTAL: <span className="text-gallery font-semibold">{totalTokens.toLocaleString()}</span>
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="self-start cursor-pointer text-xs text-wedgewood"
-        >
-          {expanded ? '접기 ↑' : '상세 보기 →'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="cursor-pointer text-xs text-wedgewood"
+          >
+            {expanded ? '접기 ↑' : '상세 보기 →'}
+          </button>
+          {isFinal && (
+            <button
+              type="button"
+              onClick={() => setArtifactOpen((v) => !v)}
+              className="cursor-pointer text-xs text-wedgewood"
+            >
+              {artifactOpen ? '제출 답변 접기 ↑' : '제출한 답변 보기 →'}
+            </button>
+          )}
+        </div>
+
+        {isFinal && artifactOpen && (
+          <div className="mt-2 p-3 rounded border border-gallery-9 bg-ebony text-[13px] text-gallery whitespace-pre-wrap">
+            {artifact ?? (
+              <span className="italic text-santas-gray">
+                곧 제공될 예정입니다.
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-// 결과 리포트 표시 컴포넌트가 공유하는 뷰 타입. (구 data/dummyResult.ts의 인터페이스를 이전)
+// 결과 리포트 표시 컴포넌트가 공유하는 뷰 타입.
 
 export interface RubricCriterionData {
   id: string;
@@ -15,8 +15,9 @@ export interface AttemptRecord {
   label: string;
   time: string;
   prompt: string;
-  inTokens?: number; // 백엔드는 교환당 총계만 집계 — in/out은 표시 선택
-  outTokens?: number;
   totalTokens: number;
   isFinal?: boolean;
+  // 최종 제출(isFinal) 항목의 실제 제출 답변. 백엔드 응답에 artifact 필드가
+  // 추가되기 전까지는 undefined/null이며 UI가 placeholder를 대신 표시한다.
+  artifact?: string | null;
 }
