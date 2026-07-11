@@ -35,6 +35,15 @@ export default function MyPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<MyPageData | null>(null);
 
+  function goToAttempt(item: MyAttemptSummary) {
+    if (item.status === 'GRADED') {
+      navigate(`/result/${item.attemptId}`);
+    } else {
+      // IN_PROGRESS — 진행 중 세션 복원 (서버가 idempotent하게 처리)
+      navigate(`/problems/${item.problemId}/attempt`);
+    }
+  }
+
   useEffect(() => {
     Promise.all([
       fetchMyProfile(),
@@ -155,10 +164,6 @@ export default function MyPage() {
             </div>
             <div className="px-5 pb-5">
               <ScatterPlot points={scatterForChart} />
-              <div className="mt-2 flex justify-between text-[11.5px] text-santas-gray">
-                <span>← 효율성 낮음</span>
-                <span>효율성 높음 →</span>
-              </div>
             </div>
           </div>
 
@@ -201,8 +206,14 @@ export default function MyPage() {
                         key={item.attemptId}
                         className="hover:bg-white/[0.02]"
                       >
-                        <td className="px-3.5 py-3 text-[13.5px] text-gallery">
-                          {item.problemTitle}
+                        <td className="px-3.5 py-3 text-[13.5px]">
+                          <button
+                            type="button"
+                            onClick={() => goToAttempt(item)}
+                            className="cursor-pointer text-left text-wedgewood hover:text-wedgewood/80 hover:underline"
+                          >
+                            {item.problemTitle}
+                          </button>
                         </td>
                         <td className="px-3.5 py-3 text-[13.5px] text-gallery">
                           {fmtDate(item.submittedAt) ?? '-'}
