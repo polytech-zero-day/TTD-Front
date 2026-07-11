@@ -139,7 +139,7 @@ export default function Leaderboard() {
           <StatCard
             label="상위 10명 평균 토큰 사용량"
             value={avgTokensText}
-            sub="문제당 누적"
+            sub={activeTab === 'overall' ? '문제당 평균' : '이 문제 평균'}
             accent
           />
           <StatCard
@@ -179,12 +179,12 @@ export default function Leaderboard() {
               </div>
               <Select
                 variant="form"
-                className="w-56"
+                className="min-w-56 max-w-96"
                 value={selectedProblemId !== null ? String(selectedProblemId) : ''}
                 onChange={(e) => setSelectedProblemId(Number(e.target.value))}
               >
                 {problems.map((p) => (
-                  <option key={p.id} value={String(p.id)} className="bg-mirage text-gallery">
+                  <option key={p.id} value={String(p.id)} className="bg-ebony text-gallery">
                     {p.title}
                   </option>
                 ))}
