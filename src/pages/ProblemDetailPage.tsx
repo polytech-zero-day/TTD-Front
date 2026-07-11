@@ -4,6 +4,8 @@ import Topbar from '../components/Topbar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import { fetchProblem } from '@/lib/api/problems';
+import { getCurrentAttempt, type AttemptSnapshot } from '@/lib/api/attempt';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import {
   PROBLEM_TYPE_LABEL,
   type ProblemDetail as ProblemDetailData,
@@ -38,7 +40,21 @@ function BulletSection({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function ProblemDetail({ problem }: { problem: ProblemDetailData }) {
+function formatRemainingTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function ProblemDetail({
+  problem,
+  currentAttempt,
+  isPaid,
+}: {
+  problem: ProblemDetailData;
+  currentAttempt: AttemptSnapshot | null;
+  isPaid: boolean;
+}) {
   const {
     id,
     title,
@@ -53,6 +69,28 @@ function ProblemDetail({ problem }: { problem: ProblemDetailData }) {
   } = problem;
 
   const chip = SOURCE_TYPE_CHIP[sourceType];
+  const attemptMeta = currentAttempt && {
+    IN_PROGRESS: {
+      badge: `응시 중 · ${formatRemainingTime(currentAttempt.remainingSeconds)} 남음`,
+      action: '이어서 풀기',
+      hint: '현재 응시 세션이 유지되고 있습니다.',
+      tone: 'success' as const,
+    },
+    GRADING: {
+      badge: '채점 중',
+      action: '채점 상태 보기',
+      hint: '제출이 완료되어 채점 결과를 기다리고 있습니다.',
+      tone: 'accent' as const,
+    },
+    GRADING_FAILED: {
+      badge: '채점 실패 · 재채점 가능',
+      action: '재채점하기',
+      hint: '기존 응시를 열어 재채점을 요청할 수 있습니다.',
+      tone: 'neutral' as const,
+    },
+    GRADED: null,
+    ABANDONED: null,
+  }[currentAttempt.status];
 
   return (
     <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
@@ -71,10 +109,11 @@ function ProblemDetail({ problem }: { problem: ProblemDetailData }) {
           <div className="flex items-center gap-2">
             <Badge tone="accent">{difficulty}</Badge>
             <Badge tone="neutral">{PROBLEM_TYPE_LABEL[type]}</Badge>
+            {attemptMeta && <Badge tone={attemptMeta.tone}>{attemptMeta.badge}</Badge>}
           </div>
           <h1 className="text-[28px] font-bold text-gallery">{title}</h1>
           <div className="text-xs text-santas-gray">
-            최대 {maxAttempts}회 응시
+            {isPaid ? 'PAID · 문제·프롬프트 횟수 무제한' : `최대 ${maxAttempts}회 응시`}
           </div>
         </div>
 
@@ -126,10 +165,13 @@ function ProblemDetail({ problem }: { problem: ProblemDetailData }) {
             // 클릭 시 빈 화면이 나오는 것이 정상이며, S-04 완성 시 자연스럽게 연결됨.
             onClick={() => (window.location.href = `/problems/${id}/attempt`)}
           >
-            응시 시작하기
+            {attemptMeta?.action ?? '응시 시작하기'}
           </Button>
           <span className="text-xs text-santas-gray">
-            최대 {maxAttempts}회 응시 가능 · 문제당 프롬프트 3회 제한
+            {attemptMeta?.hint ??
+              (isPaid
+                ? 'PAID 플랜은 문제·프롬프트 횟수 제한 없이 응시할 수 있습니다.'
+                : `최대 ${maxAttempts}회 응시 가능 · 문제당 프롬프트 3회 제한`)}
           </span>
         </div>
       </div>
@@ -168,14 +210,50 @@ function NotFound() {
 
 export default function ProblemDetailPage() {
   const { id } = useParams();
+  const { plan } = useCurrentUser();
   const [problem, setProblem] = useState<ProblemDetailData | null>(null);
+  const [currentAttempt, setCurrentAttempt] = useState<AttemptSnapshot | null>(null);
   const [notFound, setNotFound] = useState(false); // 미존재·비공개 문제(404) 포함 조회 실패
 
   useEffect(() => {
-    fetchProblem(Number(id))
-      .then(setProblem)
-      .catch(() => setNotFound(true));
+    let cancelled = false;
+    const problemId = Number(id);
+    fetchProblem(problemId)
+      .then((data) => {
+        if (!cancelled) setProblem(data);
+      })
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      });
+    // 진행·채점 중 세션이 없는 404는 정상이다. 상세 화면에서는 새 응시 CTA를 그대로 보여준다.
+    getCurrentAttempt(problemId)
+      .then((attempt) => {
+        if (!cancelled) setCurrentAttempt(attempt);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
+
+  // 서버가 내려준 남은 시간을 화면에서만 1초씩 줄인다. 매초 API를 호출하지 않아도
+  // 상세 화면의 배지와 실제 응시 타이머가 자연스럽게 함께 흐른다.
+  useEffect(() => {
+    if (
+      currentAttempt?.status !== 'IN_PROGRESS' ||
+      currentAttempt.remainingSeconds <= 0
+    ) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setCurrentAttempt((attempt) =>
+        attempt?.status === 'IN_PROGRESS' && attempt.remainingSeconds > 0
+          ? { ...attempt, remainingSeconds: attempt.remainingSeconds - 1 }
+          : attempt
+      );
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [currentAttempt?.status, currentAttempt?.remainingSeconds]);
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
@@ -189,7 +267,11 @@ export default function ProblemDetailPage() {
           </span>
         </main>
       ) : (
-        <ProblemDetail problem={problem} />
+        <ProblemDetail
+          problem={problem}
+          currentAttempt={currentAttempt}
+          isPaid={plan === 'PAID'}
+        />
       )}
     </div>
   );

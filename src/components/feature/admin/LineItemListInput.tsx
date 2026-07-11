@@ -41,6 +41,7 @@ export default function LineItemListInput({
               type="button"
               size="sm"
               variant="muted"
+              className="shrink-0 whitespace-nowrap"
               onClick={() => removeItem(index)}
             >
               삭제

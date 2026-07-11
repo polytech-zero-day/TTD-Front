@@ -22,8 +22,10 @@ export default function AiModelSettingsPage() {
   const [savingPurpose, setSavingPurpose] = useState<AiPurpose | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     fetchAiModelSettings()
       .then((data) => {
+        if (cancelled) return;
         setSettings(data.settings);
         setAvailableModels(data.availableModels);
         setDrafts(
@@ -31,10 +33,14 @@ export default function AiModelSettingsPage() {
         );
       })
       .catch((err: unknown) => {
+        if (cancelled) return;
         setLoadError(
           getApiErrorMessage(err, 'AI 모델 설정을 불러오지 못했습니다.')
         );
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleSave(purpose: AiPurpose) {

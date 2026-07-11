@@ -1,6 +1,7 @@
 import Badge from '@/components/ui/Badge';
 import { formatDate } from '@/lib/format';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 import {
   PROBLEM_STATUS_LABEL,
   PROBLEM_TYPE_LABEL,
@@ -73,19 +74,19 @@ export default function AdminProblemTable({
                 {SOURCE_TYPE_LABEL[problem.sourceType]}
               </td>
               <td className="px-5 py-3">
-                <select
+                <Select
                   value={problem.status}
                   onChange={(e) =>
                     onStatusChange(problem, e.target.value as ProblemStatus)
                   }
-                  className="appearance-none rounded-lg border border-gallery-9 bg-ebony px-[10px] py-[6px] text-[12.5px] text-gallery outline-none focus:border-wedgewood"
+                  className="w-[112px]"
                 >
                   {STATUS_OPTIONS.map((status) => (
                     <option key={status} value={status} className="bg-mirage">
                       {PROBLEM_STATUS_LABEL[status]}
                     </option>
                   ))}
-                </select>
+                </Select>
               </td>
               <td className="px-5 py-3 text-[13px] text-santas-gray">
                 {formatDate(problem.updatedAt)}

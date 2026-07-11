@@ -3,6 +3,7 @@ import Topbar from '../components/Topbar';
 import PlanCard from '../components/feature/pricing/PlanCard';
 import { plans } from '../data/dummyPricing';
 import { getMySubscription } from '@/lib/api/subscription';
+import { isPaidSubscription } from '@/lib/subscription/plan';
 import type { PlanId } from '../types/pricing';
 
 
@@ -14,7 +15,7 @@ export default function PricingPage() {
 
     getMySubscription().then((subscription) => {
       if (cancelled) return;
-      setCurrentPlanId(subscription?.status === 'ACTIVE' ? 'PAID' : 'FREE');
+      setCurrentPlanId(isPaidSubscription(subscription?.status) ? 'PAID' : 'FREE');
     });
 
     return () => {
@@ -42,8 +43,14 @@ export default function PricingPage() {
               key={plan.id}
               plan={plan}
               isCurrent={currentPlanId !== null && plan.id === currentPlanId}
+              isActionDisabled={currentPlanId === 'PAID' && plan.id === 'FREE'}
+              actionLabel={
+                currentPlanId === 'PAID' && plan.id === 'FREE'
+                  ? '유료 플랜 이용 중'
+                  : undefined
+              }
               onSelect={() => {
-                if (plan.id !== currentPlanId) {
+                if (plan.id === 'PAID' && plan.id !== currentPlanId) {
                   window.location.href = '/payment';
                 }
               }}

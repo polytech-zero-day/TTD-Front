@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Topbar from '../components/Topbar';
 import ProblemCard from '../components/ProblemCard';
 import { fetchProblems } from '@/lib/api/problems';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import {
   TYPE_FILTERS,
   type Difficulty,
@@ -42,6 +43,7 @@ function FilterChip({
 }
 
 export default function ProblemListPage() {
+  const { plan } = useCurrentUser();
   const [level, setLevel] = useState<LevelFilter>('ALL');
   // 유형 필터: null = 전체 유형, 아니면 TYPE_FILTERS 의 label.
   const [typeLabel, setTypeLabel] = useState<string | null>(null);
@@ -49,9 +51,17 @@ export default function ProblemListPage() {
   const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     fetchProblems()
-      .then(setProblems)
-      .catch(() => setLoadFailed(true));
+      .then((data) => {
+        if (!cancelled) setProblems(data);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -75,7 +85,9 @@ export default function ProblemListPage() {
           <h1 className="text-[28px] font-bold text-gallery">문제 카탈로그</h1>
           <p className="text-sm text-santas-gray">
             실제 AI 활용 능력 평가 전형과 동일한 유형의 문제로 연습하세요.
-            문제당 프롬프트는 3회로 제한됩니다.
+            {plan === 'PAID'
+              ? ' PAID 플랜은 문제·프롬프트 횟수 제한 없이 응시할 수 있습니다.'
+              : ' 문제당 프롬프트는 3회로 제한됩니다.'}
           </p>
         </div>
 
@@ -133,7 +145,11 @@ export default function ProblemListPage() {
         ) : filtered.length > 0 ? (
           <div className="grid grid-cols-3 gap-6">
             {filtered.map((problem) => (
-              <ProblemCard key={problem.id} problem={problem} />
+              <ProblemCard
+                key={problem.id}
+                problem={problem}
+                isPaid={plan === 'PAID'}
+              />
             ))}
           </div>
         ) : (

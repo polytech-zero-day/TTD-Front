@@ -9,12 +9,14 @@ function formatTime(total: number) {
 interface Props {
   usage: AttemptUsage;
   remainingSeconds: number;
+  chatModel: string | null;
   onExit: () => void;
 }
 
 export default function AttemptTopbar({
   usage,
   remainingSeconds,
+  chatModel,
   onExit,
 }: Props) {
   return (
@@ -24,8 +26,15 @@ export default function AttemptTopbar({
       <span className="text-sm text-santas-gray">문제 응시 중</span>
 
       <div className="ml-auto flex items-center gap-3">
+        {chatModel && (
+          <span className="flex items-center gap-1.5 rounded-md bg-charade px-2.5 py-1 text-xs text-santas-gray">
+            모델 <span className="font-semibold text-gallery">{chatModel}</span>
+          </span>
+        )}
         <span className="rounded-md bg-charade px-2.5 py-1 text-xs text-santas-gray">
-          메시지 {usage.messagesUsed} / {usage.messagesLimit}
+          {usage.unlimited
+            ? '메시지 무제한'
+            : `메시지 ${usage.messagesUsed} / ${usage.messagesLimit}`}
         </span>
         <span className="rounded-md bg-charade px-2.5 py-1 text-[13px] font-bold text-gallery tabular-nums">
           {formatTime(remainingSeconds)}
