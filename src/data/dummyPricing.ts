@@ -25,7 +25,11 @@ export const plans: Plan[] = [
     recommended: true,
     features: [
       { label: 'FREE의 모든 기능 포함', included: true },
-      { label: '상위 AI 모델(gpt-5.4)로 응시', included: true, emphasis: '상위 모델' },
+      {
+        label: '상위 AI 모델(gpt-5.4)로 응시',
+        included: true,
+        emphasis: '상위 모델',
+      },
       { label: '문제별 응시 횟수', included: true, emphasis: '무제한' },
       { label: '응시 내 프롬프트 횟수', included: true, emphasis: '무제한' },
     ],
