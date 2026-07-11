@@ -12,7 +12,6 @@ import {
   PAYMENT_MOCK,
 } from '@/lib/payment/portone';
 
-
 const paidPlan = plans.find((plan) => plan.id === 'PAID');
 
 export default function PaymentPage() {
@@ -51,9 +50,16 @@ export default function PaymentPage() {
 
         <div className="rounded-[9px] border border-dashed border-gallery-9 bg-gallery/5 px-[15px] py-[13px] text-[11.9px] leading-[18.75px] text-santas-gray">
           {PAYMENT_MOCK ? (
-            <>🧪 테스트 결제입니다. 카드 등록창이 뜨면 테스트 카드로 진행하세요. 실제 청구는 발생하지 않으며, 발급이 안 돼도 데모용으로 구독이 활성화됩니다.</>
+            <>
+              🧪 테스트 결제입니다. 카드 등록창이 뜨면 테스트 카드로 진행하세요.
+              실제 청구는 발생하지 않으며, 발급이 안 돼도 데모용으로 구독이
+              활성화됩니다.
+            </>
           ) : (
-            <>🔒 카드 정보는 결제대행사(PortOne) 화면에서 직접 입력하며, TTD 서버에는 저장되지 않습니다.</>
+            <>
+              🔒 카드 정보는 결제대행사(PortOne) 화면에서 직접 입력하며, TTD
+              서버에는 저장되지 않습니다.
+            </>
           )}
         </div>
 

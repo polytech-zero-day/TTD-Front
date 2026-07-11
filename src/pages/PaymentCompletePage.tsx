@@ -8,9 +8,7 @@ import { getMySubscription } from '@/lib/api/subscription';
 import { formatDate } from '@/lib/format';
 import type { SubscriptionResponse } from '@/types/subscription';
 
-
 const paidPlan = plans.find((plan) => plan.id === 'PAID');
-
 
 // S-14 결제 완료 화면. 결제 성공(PaymentPage) 직후 진입해 구독 전환 완료를 안내한다.
 // 결제 직후에는 라우터 state의 구독 응답을 그대로 쓰고, 새로고침 등 state가 없으면 재조회한다.

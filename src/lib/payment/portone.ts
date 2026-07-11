@@ -18,7 +18,12 @@ export class BillingKeyIssueError extends Error {}
 //
 // F117은 PG(나이스페이) 코드라 PortOne 응답의 pgCode/pgMessage에 담긴다(code/message는
 // 'FAILURE_TYPE_PG' 등 PortOne 레벨 값). 코드가 안 오는 환경도 있어 한글 문구까지 함께 본다.
-const F117_SIGNALS = [/\bF117\b/i, /미사용\s*가맹점/, /미가맹점/, /빌링[^가-힣]*미(사용|지원)/];
+const F117_SIGNALS = [
+  /\bF117\b/i,
+  /미사용\s*가맹점/,
+  /미가맹점/,
+  /빌링[^가-힣]*미(사용|지원)/,
+];
 const looksLikeF117 = (...values: unknown[]) =>
   values.some(
     (v) => typeof v === 'string' && F117_SIGNALS.some((re) => re.test(v))

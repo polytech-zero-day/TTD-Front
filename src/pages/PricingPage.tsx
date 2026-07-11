@@ -8,7 +8,6 @@ import { isPaidSubscription } from '@/lib/subscription/plan';
 import { isAuthenticated } from '@/lib/auth/session';
 import type { PlanId } from '../types/pricing';
 
-
 export default function PricingPage() {
   const navigate = useNavigate();
   const [currentPlanId, setCurrentPlanId] = useState<PlanId | null>(null);
@@ -20,7 +19,9 @@ export default function PricingPage() {
 
     getMySubscription().then((subscription) => {
       if (cancelled) return;
-      setCurrentPlanId(isPaidSubscription(subscription?.status) ? 'PAID' : 'FREE');
+      setCurrentPlanId(
+        isPaidSubscription(subscription?.status) ? 'PAID' : 'FREE'
+      );
     });
 
     return () => {
@@ -47,7 +48,11 @@ export default function PricingPage() {
             <PlanCard
               key={plan.id}
               plan={plan}
-              isCurrent={isLoggedIn && currentPlanId !== null && plan.id === currentPlanId}
+              isCurrent={
+                isLoggedIn &&
+                currentPlanId !== null &&
+                plan.id === currentPlanId
+              }
               isActionDisabled={
                 isLoggedIn && currentPlanId === 'PAID' && plan.id === 'FREE'
               }
@@ -57,8 +62,8 @@ export default function PricingPage() {
                     ? '로그인 후 업그레이드'
                     : '무료로 시작하기'
                   : currentPlanId === 'PAID' && plan.id === 'FREE'
-                  ? '유료 플랜 이용 중'
-                  : undefined
+                    ? '유료 플랜 이용 중'
+                    : undefined
               }
               onSelect={() => {
                 if (!isLoggedIn) {
