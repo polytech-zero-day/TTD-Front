@@ -5,4 +5,6 @@ export interface SubscriptionResponse {
   currentPeriodStart: string;
   nextBillingAt: string;
   canceledAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  cancelRequestedAt: string | null;
 }

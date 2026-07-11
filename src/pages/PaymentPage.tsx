@@ -5,13 +5,19 @@ import Button from '../components/ui/Button';
 import { plans } from '../data/dummyPricing';
 import { ApiError } from '@/lib/api/client';
 import { subscribe } from '@/lib/api/subscription';
-import { BillingKeyIssueError, issueBillingKey } from '@/lib/payment/portone';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
+import {
+  BillingKeyIssueError,
+  issueBillingKey,
+  PAYMENT_MOCK,
+} from '@/lib/payment/portone';
 
 
 const paidPlan = plans.find((plan) => plan.id === 'PAID');
 
 export default function PaymentPage() {
   const navigate = useNavigate();
+  const { refresh } = useCurrentUser();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,6 +27,7 @@ export default function PaymentPage() {
     try {
       const billingKey = await issueBillingKey();
       const subscription = await subscribe(billingKey);
+      await refresh();
       // 구독 응답을 state로 넘겨 완료 화면이 재조회 없이 확정 데이터를 표시
       navigate('/payment/complete', { state: { subscription } });
     } catch (err) {
@@ -43,8 +50,11 @@ export default function PaymentPage() {
         </h1>
 
         <div className="rounded-[9px] border border-dashed border-gallery-9 bg-gallery/5 px-[15px] py-[13px] text-[11.9px] leading-[18.75px] text-santas-gray">
-          🔒 카드 정보는 결제대행사(PortOne) 화면에서 직접 입력하며, TTD
-          서버에는 저장되지 않습니다.
+          {PAYMENT_MOCK ? (
+            <>🧪 테스트 결제입니다. 카드 등록창이 뜨면 테스트 카드로 진행하세요. 실제 청구는 발생하지 않으며, 발급이 안 돼도 데모용으로 구독이 활성화됩니다.</>
+          ) : (
+            <>🔒 카드 정보는 결제대행사(PortOne) 화면에서 직접 입력하며, TTD 서버에는 저장되지 않습니다.</>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 rounded-xl border border-gallery-9 bg-mirage p-5 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
@@ -82,7 +92,11 @@ export default function PaymentPage() {
           disabled={isProcessing}
           onClick={handleConfirm}
         >
-          {isProcessing ? '처리 중...' : '카드 등록하고 결제하기'}
+          {isProcessing
+            ? '처리 중...'
+            : PAYMENT_MOCK
+              ? '테스트 결제로 구독하기'
+              : '카드 등록하고 결제하기'}
         </Button>
 
         <button

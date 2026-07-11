@@ -27,7 +27,9 @@ export default function PaymentCompletePage() {
 
   useEffect(() => {
     if (stateSubscription) return;
+    let cancelled = false;
     getMySubscription().then((sub) => {
+      if (cancelled) return;
       if (sub) {
         setSubscription(sub);
         return;
@@ -36,6 +38,9 @@ export default function PaymentCompletePage() {
       toast.error('구독 내역이 없습니다. 요금제에서 결제를 진행해주세요.');
       navigate('/pricing', { replace: true });
     });
+    return () => {
+      cancelled = true;
+    };
   }, [stateSubscription, navigate]);
 
   return (

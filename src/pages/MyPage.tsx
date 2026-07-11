@@ -9,6 +9,13 @@ import ScatterPlot, {
 import Avatar from '../components/ui/Avatar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
+import {
+  cancelSubscription,
+  getMySubscription,
+} from '@/lib/api/subscription';
+import { formatDate } from '@/lib/format';
+import type { SubscriptionResponse } from '@/types/subscription';
 import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
 import {
   fetchMyAttempts,
@@ -24,6 +31,7 @@ interface MyPageData {
   attempts: MyAttemptSummary[];
   stats: MyAttemptStats;
   scatter: ApiScatterPoint[];
+  subscription: SubscriptionResponse | null;
 }
 
 const fmtScore = (n: number | null) => (n === null ? '—' : n.toFixed(1));
@@ -33,6 +41,7 @@ const statusLabel = (s: MyAttemptSummary['status']) =>
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { plan, refresh } = useCurrentUser();
   const [data, setData] = useState<MyPageData | null>(null);
 
   function goToAttempt(item: MyAttemptSummary) {
@@ -45,19 +54,27 @@ export default function MyPage() {
   }
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([
       fetchMyProfile(),
       fetchMyAttempts(),
       fetchMyStats(),
       fetchScatterData(),
+      getMySubscription(),
     ])
-      .then(([profile, attempts, stats, scatter]) => {
-        setData({ profile, attempts, stats, scatter });
+      .then(([profile, attempts, stats, scatter, subscription]) => {
+        if (cancelled) return;
+        setData({ profile, attempts, stats, scatter, subscription });
       })
       .catch(() => {
+        // StrictMode의 개발용 effect 재실행에서 정리된 첫 요청은 무시한다.
+        if (cancelled) return;
         toast.error('마이페이지 정보를 불러오지 못했습니다.');
         navigate('/', { replace: true });
       });
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   if (!data) {
@@ -72,6 +89,26 @@ export default function MyPage() {
   }
 
   const { profile, attempts, stats, scatter } = data;
+
+  async function handleCancelSubscription() {
+    const nextBillingAt = data?.subscription?.nextBillingAt;
+    if (!nextBillingAt) return;
+    if (
+      !window.confirm(
+        `자동 갱신을 중단할까요? ${formatDate(nextBillingAt)}까지 PAID 혜택을 이용할 수 있습니다.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const subscription = await cancelSubscription();
+      setData((current) => (current ? { ...current, subscription } : current));
+      await refresh();
+      toast.success('자동 갱신이 취소되었습니다. 현재 결제 주기 종료일까지 이용할 수 있습니다.');
+    } catch {
+      toast.error('구독 취소에 실패했습니다. 다시 시도해주세요.');
+    }
+  }
 
   const joinedAt = fmtDate(profile.createdAt) ?? '—';
   const lastAttemptAt =
@@ -107,7 +144,7 @@ export default function MyPage() {
               <span className="text-2xl font-bold text-gallery">
                 {profile.nickname}
               </span>
-              <Badge tone="pill">FREE</Badge>
+              <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
             </div>
             <div className="text-base text-santas-gray">
               가입일 {joinedAt} · 총 제출 {stats.totalAttempts}회 · 최근 응시{' '}
@@ -122,6 +159,27 @@ export default function MyPage() {
             요금제 보기
           </Button>
         </section>
+
+        {data.subscription && plan === 'PAID' && (
+          <section className="flex items-center gap-4 rounded-xl border border-gallery-9 bg-mirage p-5 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+            <div className="min-w-0 flex-1">
+              <div className="text-base font-semibold text-gallery">PAID 월간 구독</div>
+              <div className="mt-1 text-sm text-santas-gray">
+                {data.subscription.cancelAtPeriodEnd
+                  ? `${formatDate(data.subscription.nextBillingAt)}까지 이용 가능 · 자동 갱신이 취소되었습니다.`
+                  : `다음 결제일 ${formatDate(data.subscription.nextBillingAt)} · 자동 갱신 중`}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={data.subscription.cancelAtPeriodEnd}
+              onClick={handleCancelSubscription}
+            >
+              {data.subscription.cancelAtPeriodEnd ? '취소 예약됨' : '구독 취소'}
+            </Button>
+          </section>
+        )}
 
         {/* 통계 카드 4개 */}
         <section className="flex gap-3.5">
@@ -242,25 +300,26 @@ export default function MyPage() {
           </div>
         </section>
 
-        {/* 유료 업그레이드 유도 패널 */}
-        <section className="flex items-center gap-3.5 rounded-xl border border-gallery-9 bg-mirage p-5 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
-          <span className="text-2xl">🔒</span>
-          <div className="min-w-0 flex-1">
-            <div className="text-base font-semibold text-gallery">
-              심화 리포트는 유료 플랜에서 제공돼요
+        {plan === 'FREE' && (
+          <section className="flex items-center gap-3.5 rounded-xl border border-gallery-9 bg-mirage p-5 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+            <span className="text-2xl">✨</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-base font-semibold text-gallery">
+                유료 플랜으로 응시 제한 없이 연습하세요
+              </div>
+              <div className="mt-0.5 text-sm text-santas-gray">
+                상위 AI 모델과 문제·프롬프트 무제한 응시를 이용할 수 있습니다.
+              </div>
             </div>
-            <div className="mt-0.5 text-sm text-santas-gray">
-              성장 추이 그래프와 약점 분석으로 더 깊은 인사이트를 확인하세요.
-            </div>
-          </div>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => (window.location.href = '/pricing')}
-          >
-            업그레이드
-          </Button>
-        </section>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => (window.location.href = '/pricing')}
+            >
+              업그레이드
+            </Button>
+          </section>
+        )}
       </main>
     </div>
   );
