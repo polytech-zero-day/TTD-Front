@@ -8,6 +8,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import ProblemManagementPage from './pages/admin/ProblemManagementPage';
 import AiModelSettingsPage from './pages/admin/AiModelSettingsPage';
+import CalibrationPage from './pages/admin/CalibrationPage';
 import ProblemListPage from './pages/ProblemListPage';
 import ProblemDetailPage from './pages/ProblemDetailPage';
 import MyPage from './pages/MyPage';
@@ -48,6 +49,7 @@ export default function App() {
                 <Route path="users" element={<UserManagementPage />} />
                 <Route path="problems" element={<ProblemManagementPage />} />
                 <Route path="ai-models" element={<AiModelSettingsPage />} />
+                <Route path="calibration" element={<CalibrationPage />} />
               </Route>
             </Route>
           </Route>

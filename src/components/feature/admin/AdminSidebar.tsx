@@ -10,6 +10,7 @@ const NAV_ITEMS: AdminNavItem[] = [
   { to: '/admin/users', label: '사용자 관리' },
   { to: '/admin/problems', label: '문제 관리' },
   { to: '/admin/ai-models', label: 'AI 모델 설정' },
+  { to: '/admin/calibration', label: '캘리브레이션' },
 ];
 
 export default function AdminSidebar() {
