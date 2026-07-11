@@ -5,7 +5,6 @@ import { plans } from '../data/dummyPricing';
 import { getMySubscription } from '@/lib/api/subscription';
 import type { PlanId } from '../types/pricing';
 
-const dummyUser = { name: '김지수' };
 
 export default function PricingPage() {
   const [currentPlanId, setCurrentPlanId] = useState<PlanId | null>(null);
@@ -25,11 +24,7 @@ export default function PricingPage() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar
-        active="pricing"
-        userName={dummyUser.name}
-        plan={currentPlanId ?? 'FREE'}
-      />
+      <Topbar active="pricing" />
 
       <main className="mx-auto flex w-full max-w-[820px] flex-col items-center gap-[26px] px-5 pt-[42px] pb-20">
         <div className="flex flex-col items-center gap-2 text-center">

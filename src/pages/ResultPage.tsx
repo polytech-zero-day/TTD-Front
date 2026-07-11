@@ -8,7 +8,6 @@ import AttemptTimelineItem from '../components/feature/result/AttemptTimelineIte
 import { getAttemptResult, type AttemptResult } from '@/lib/api/attempt';
 import type { AttemptRecord, RubricCriterionData } from '../data/dummyResult';
 
-const dummyUser = { name: '김지수', plan: 'FREE' as const }; // TODO: 인증 컨텍스트 연동 시 교체
 
 // "2026-07-10T15:34:28.123" → "2026-07-10 15:34:28"
 const formatDateTime = (iso: string | null) =>
@@ -88,7 +87,7 @@ export default function ResultPage() {
 
   return (
     <div className="w-full min-h-screen bg-ebony font-sans">
-      <Topbar active="catalog" userName={dummyUser.name} plan={dummyUser.plan} />
+      <Topbar active="catalog" />
 
       <main className="flex flex-col gap-5 w-full max-w-[1240px] mx-auto px-10 pt-8 pb-20">
         {/* 헤더 */}

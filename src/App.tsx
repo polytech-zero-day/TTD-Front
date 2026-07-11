@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { Toaster } from 'sonner';
+import { CurrentUserProvider } from '@/lib/auth/CurrentUserContext';
 import AuthPage from './pages/AuthPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
@@ -21,7 +22,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toaster theme="dark" position="top-center" richColors />
-      <Routes>
+      <CurrentUserProvider>
+        <Routes>
         <Route path="/" element={<ProblemListPage />} />
         <Route path="/problems" element={<ProblemListPage />} />
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
@@ -42,7 +44,8 @@ export default function App() {
         <Route path="/problems/:id/attempt" element={<AttemptPage />} />
         <Route path="/grading" element={<GradingPage />} />
         <Route path="/result/:attemptId" element={<ResultPage />} />
-      </Routes>
+        </Routes>
+      </CurrentUserProvider>
     </BrowserRouter>
   );
 }

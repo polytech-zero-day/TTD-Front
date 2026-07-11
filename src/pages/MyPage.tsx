@@ -54,7 +54,7 @@ export default function MyPage() {
   if (!data) {
     return (
       <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-        <Topbar active="mypage" userName="" plan="FREE" />
+        <Topbar active="mypage" />
         <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-[22px] px-5 pt-8 pb-20">
           <p className="text-[13px] text-santas-gray">불러오는 중…</p>
         </main>
@@ -87,7 +87,7 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar active="mypage" userName={profile.nickname} plan="FREE" />
+      <Topbar active="mypage" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-[22px] px-5 pt-8 pb-20">
         {/* 프로필 패널 */}

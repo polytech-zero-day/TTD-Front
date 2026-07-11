@@ -3,7 +3,6 @@ import { useParams } from 'react-router';
 import Topbar from '../components/Topbar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import { dummyViewer } from '../data/dummyProblems';
 import { fetchProblem } from '@/lib/api/problems';
 import {
   PROBLEM_TYPE_LABEL,
@@ -180,11 +179,7 @@ export default function ProblemDetailPage() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar
-        active="catalog"
-        userName={dummyViewer.name}
-        plan={dummyViewer.plan}
-      />
+      <Topbar active="catalog" />
       {notFound ? (
         <NotFound />
       ) : problem === null ? (
