@@ -273,10 +273,20 @@ export default function ResultPage() {
 
         {/* ⑥ 하단 버튼 */}
         <div className="flex gap-2">
-          <Button variant="primary" size="lg" onClick={() => navigate('/problems')}>
+          <Button
+            variant="primary"
+            size="lg"
+            className="h-[44px] border border-transparent"
+            onClick={() => navigate('/problems')}
+          >
             다음 문제로
           </Button>
-          <Button variant="outline" size="lg" onClick={() => navigate('/leaderboard')}>
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-[44px]"
+            onClick={() => navigate('/leaderboard')}
+          >
             리더보드 보기
           </Button>
         </div>
