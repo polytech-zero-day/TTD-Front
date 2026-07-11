@@ -41,18 +41,14 @@ export default function AttemptPage() {
       toast.error(message);
       navigate(`/problems/${problemId}`, { replace: true });
     },
-    startRequested,
+    plan === 'FREE' || startRequested,
     selectedChatModel
   );
 
   useEffect(() => {
     let cancelled = false;
     if (isUserLoading) return;
-    if (plan === 'FREE') {
-      setStartRequested(true);
-      setIsCheckingExisting(false);
-      return;
-    }
+    if (plan === 'FREE') return;
     getCurrentAttempt(problemId)
       .then(() => {
         if (!cancelled) setStartRequested(true);
@@ -83,7 +79,7 @@ export default function AttemptPage() {
     };
   }, [problemId, navigate]);
 
-  if (!problem || isUserLoading || isCheckingExisting) {
+  if (!problem || isUserLoading || (plan === 'PAID' && isCheckingExisting)) {
     return (
       <div className="flex h-screen items-center justify-center bg-ebony">
         <span className="text-sm text-santas-gray">
@@ -93,10 +89,12 @@ export default function AttemptPage() {
     );
   }
 
-  if (state.phase === 'loading' && startRequested) {
+  if (state.phase === 'loading' && (plan === 'FREE' || startRequested)) {
     return (
       <div className="flex h-screen items-center justify-center bg-ebony">
-        <span className="text-sm text-santas-gray">응시 정보를 불러오는 중…</span>
+        <span className="text-sm text-santas-gray">
+          응시 정보를 불러오는 중…
+        </span>
       </div>
     );
   }
@@ -133,7 +131,10 @@ export default function AttemptPage() {
             className="flex w-full max-w-md flex-col gap-5 rounded-xl border border-gallery-9 bg-mirage p-6 shadow-2xl"
           >
             <div>
-              <h1 id="model-select-title" className="text-lg font-bold text-gallery">
+              <h1
+                id="model-select-title"
+                className="text-lg font-bold text-gallery"
+              >
                 응시 모델 선택
               </h1>
               <p className="mt-1 text-sm text-santas-gray">
@@ -147,6 +148,7 @@ export default function AttemptPage() {
             >
               <option value="gpt-5.4-mini">GPT-5.4 mini</option>
               <option value="gpt-5.4">GPT-5.4</option>
+              <option value="gpt-5.4-nano">GPT-5.4 nano</option>
             </Select>
             <Button onClick={() => setStartRequested(true)}>응시 시작</Button>
           </section>

@@ -8,9 +8,15 @@ import type {
   CalibrationRunResult,
 } from '@/types/calibration';
 
-const DEFAULT_CONFIG: CalibrationConfig = { highMin: 70, midMin: 40, tolerance: 15 };
+const DEFAULT_CONFIG: CalibrationConfig = {
+  highMin: 70,
+  midMin: 40,
+  tolerance: 15,
+};
 
-const pct = (v: number | null) => (v === null ? '—' : `${v.toFixed(1)}%`);
+// 백엔드 rate는 0~1 비율이라 표시 시 100을 곱한다.
+const pct = (v: number | null) =>
+  v === null ? '—' : `${(v * 100).toFixed(1)}%`;
 const num = (v: number | null) => (v === null ? '—' : v.toFixed(1));
 
 function StatCard({
@@ -78,7 +84,9 @@ export default function CalibrationPage() {
       <div className="flex flex-col gap-4 rounded-xl border border-gallery-9 bg-mirage p-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <span className="text-base font-bold text-gallery">일치율 측정 실행</span>
+            <span className="text-base font-bold text-gallery">
+              일치율 측정 실행
+            </span>
             <span className="text-xs text-santas-gray">
               기준 샘플 전체를 실제 채점합니다 · 수 분 소요 · AI 호출 비용 발생
             </span>
@@ -176,11 +184,15 @@ export default function CalibrationPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-santas-gray">{row.expectedTier}</td>
+                    <td className="px-4 py-3 text-santas-gray">
+                      {row.expectedTier}
+                    </td>
                     <td className="px-4 py-3 text-santas-gray">
                       {row.error ? '—' : (row.gradedTier ?? '—')}
                     </td>
-                    <td className="px-4 py-3 text-santas-gray">{row.referenceScore}</td>
+                    <td className="px-4 py-3 text-santas-gray">
+                      {row.referenceScore}
+                    </td>
                     <td className="px-4 py-3 text-santas-gray">
                       {row.gradedScore ?? '—'}
                     </td>

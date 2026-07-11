@@ -41,7 +41,5 @@ export const fetchLeaderboard = (params?: {
     qs.set('limit', String(params.limit));
   }
   const suffix = qs.toString();
-  return apiFetch<Leaderboard>(
-    `/api/leaderboard${suffix ? `?${suffix}` : ''}`,
-  );
+  return apiFetch<Leaderboard>(`/api/leaderboard${suffix ? `?${suffix}` : ''}`);
 };

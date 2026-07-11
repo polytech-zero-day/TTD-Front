@@ -31,9 +31,7 @@ export function useAdminProblems() {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(
-          getApiErrorMessage(err, '문제 목록을 불러오지 못했습니다.')
-        );
+        setError(getApiErrorMessage(err, '문제 목록을 불러오지 못했습니다.'));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

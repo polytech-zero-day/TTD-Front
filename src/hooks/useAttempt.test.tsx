@@ -29,9 +29,9 @@ const makeResult = (over: Partial<AttemptResult>): AttemptResult => ({
   messages: [],
   totalTokens: 0,
   tokenBudget: 3000,
+  artifact: null,
   premium: false,
   chatModel: 'gpt-5.4-mini',
-  artifact: null,
   ...over,
 });
 
@@ -158,8 +158,22 @@ describe('useAttempt', () => {
   it('제출 확정 시 draft를 확정 저장한 뒤 제출하고, 폴링이 GRADED를 받으면 onGraded를 호출한다', async () => {
     vi.useFakeTimers();
     saveDraftMock.mockResolvedValue(undefined);
-    submitMock.mockResolvedValue(makeResult({ status: 'GRADING', rubricScore: null, efficiencyScore: null, feedback: null }));
-    getResultMock.mockResolvedValue(makeResult({ status: 'GRADED', rubricScore: 94, efficiencyScore: 88, feedback: '잘했습니다' }));
+    submitMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADING',
+        rubricScore: null,
+        efficiencyScore: null,
+        feedback: null,
+      })
+    );
+    getResultMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADED',
+        rubricScore: 94,
+        efficiencyScore: 88,
+        feedback: '잘했습니다',
+      })
+    );
     const onGraded = vi.fn();
     const { result } = renderHook(() => useAttempt(1, onGraded));
     await act(async () => {
@@ -206,7 +220,9 @@ describe('useAttempt', () => {
   it('제출이 401 등 업무 오류로 실패하면 폴링하지 않고 대화 상태로 복귀한다', async () => {
     vi.useFakeTimers();
     saveDraftMock.mockResolvedValue(undefined);
-    submitMock.mockRejectedValue(new ApiError('인증이 필요합니다.', 'UNAUTHENTICATED'));
+    submitMock.mockRejectedValue(
+      new ApiError('인증이 필요합니다.', 'UNAUTHENTICATED')
+    );
     const { result } = renderHook(() => useAttempt(1, vi.fn()));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -229,7 +245,14 @@ describe('useAttempt', () => {
     submitMock.mockRejectedValue(
       new ApiError('진행 중인 응시가 아닙니다.', 'ATTEMPT_NOT_IN_PROGRESS')
     );
-    getResultMock.mockResolvedValue(makeResult({ status: 'GRADED', rubricScore: 80, efficiencyScore: 90, feedback: 'ok' }));
+    getResultMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADED',
+        rubricScore: 80,
+        efficiencyScore: 90,
+        feedback: 'ok',
+      })
+    );
     const onGraded = vi.fn();
     const { result } = renderHook(() => useAttempt(1, onGraded));
     await act(async () => {
@@ -249,7 +272,14 @@ describe('useAttempt', () => {
   it('재진입 시 이미 제출된 세션이면 바로 채점 폴링으로 넘어간다', async () => {
     vi.useFakeTimers();
     startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING' });
-    getResultMock.mockResolvedValue(makeResult({ status: 'GRADED', rubricScore: 90, efficiencyScore: 100, feedback: 'ok' }));
+    getResultMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADED',
+        rubricScore: 90,
+        efficiencyScore: 100,
+        feedback: 'ok',
+      })
+    );
     const onGraded = vi.fn();
     const { result } = renderHook(() => useAttempt(1, onGraded));
 
@@ -287,8 +317,22 @@ describe('useAttempt', () => {
   it('폴링이 GRADING_FAILED를 받으면 폴링을 멈추고 실패 상태로 전환한다', async () => {
     vi.useFakeTimers();
     saveDraftMock.mockResolvedValue(undefined);
-    submitMock.mockResolvedValue(makeResult({ status: 'GRADING', rubricScore: null, efficiencyScore: null, feedback: null }));
-    getResultMock.mockResolvedValue(makeResult({ status: 'GRADING_FAILED', rubricScore: null, efficiencyScore: null, feedback: null }));
+    submitMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADING',
+        rubricScore: null,
+        efficiencyScore: null,
+        feedback: null,
+      })
+    );
+    getResultMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADING_FAILED',
+        rubricScore: null,
+        efficiencyScore: null,
+        feedback: null,
+      })
+    );
     const onGraded = vi.fn();
     const { result } = renderHook(() => useAttempt(1, onGraded));
     await act(async () => {
@@ -314,9 +358,26 @@ describe('useAttempt', () => {
 
   it('재채점 요청이 성공하면 다시 채점 폴링으로 돌아가 GRADED 시 onGraded를 호출한다', async () => {
     vi.useFakeTimers();
-    startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING_FAILED' });
-    regradeMock.mockResolvedValue(makeResult({ status: 'GRADING', rubricScore: null, efficiencyScore: null, feedback: null }));
-    getResultMock.mockResolvedValue(makeResult({ status: 'GRADED', rubricScore: 88, efficiencyScore: 100, feedback: '복구 완료' }));
+    startAttemptMock.mockResolvedValue({
+      ...snapshot,
+      status: 'GRADING_FAILED',
+    });
+    regradeMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADING',
+        rubricScore: null,
+        efficiencyScore: null,
+        feedback: null,
+      })
+    );
+    getResultMock.mockResolvedValue(
+      makeResult({
+        status: 'GRADED',
+        rubricScore: 88,
+        efficiencyScore: 100,
+        feedback: '복구 완료',
+      })
+    );
     const onGraded = vi.fn();
     const { result } = renderHook(() => useAttempt(1, onGraded));
     await act(async () => {
@@ -338,7 +399,10 @@ describe('useAttempt', () => {
 
   it('재채점 요청이 실패하면 실패 상태를 유지한다', async () => {
     vi.useFakeTimers();
-    startAttemptMock.mockResolvedValue({ ...snapshot, status: 'GRADING_FAILED' });
+    startAttemptMock.mockResolvedValue({
+      ...snapshot,
+      status: 'GRADING_FAILED',
+    });
     regradeMock.mockRejectedValue(new Error('server error'));
     const { result } = renderHook(() => useAttempt(1, vi.fn()));
     await act(async () => {

@@ -25,9 +25,7 @@ export function useAdminUsers() {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(
-          getApiErrorMessage(err, '사용자 목록을 불러오지 못했습니다.')
-        );
+        setError(getApiErrorMessage(err, '사용자 목록을 불러오지 못했습니다.'));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

@@ -10,10 +10,7 @@ import Avatar from '../components/ui/Avatar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
-import {
-  cancelSubscription,
-  getMySubscription,
-} from '@/lib/api/subscription';
+import { cancelSubscription, getMySubscription } from '@/lib/api/subscription';
 import { formatDate } from '@/lib/format';
 import type { SubscriptionResponse } from '@/types/subscription';
 import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
@@ -104,7 +101,9 @@ export default function MyPage() {
       const subscription = await cancelSubscription();
       setData((current) => (current ? { ...current, subscription } : current));
       await refresh();
-      toast.success('자동 갱신이 취소되었습니다. 현재 결제 주기 종료일까지 이용할 수 있습니다.');
+      toast.success(
+        '자동 갱신이 취소되었습니다. 현재 결제 주기 종료일까지 이용할 수 있습니다.'
+      );
     } catch {
       toast.error('구독 취소에 실패했습니다. 다시 시도해주세요.');
     }
@@ -163,7 +162,9 @@ export default function MyPage() {
         {data.subscription && plan === 'PAID' && (
           <section className="flex items-center gap-4 rounded-xl border border-gallery-9 bg-mirage p-5 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
             <div className="min-w-0 flex-1">
-              <div className="text-base font-semibold text-gallery">PAID 월간 구독</div>
+              <div className="text-base font-semibold text-gallery">
+                PAID 월간 구독
+              </div>
               <div className="mt-1 text-sm text-santas-gray">
                 {data.subscription.cancelAtPeriodEnd
                   ? `${formatDate(data.subscription.nextBillingAt)}까지 이용 가능 · 자동 갱신이 취소되었습니다.`
@@ -176,7 +177,9 @@ export default function MyPage() {
               disabled={data.subscription.cancelAtPeriodEnd}
               onClick={handleCancelSubscription}
             >
-              {data.subscription.cancelAtPeriodEnd ? '취소 예약됨' : '구독 취소'}
+              {data.subscription.cancelAtPeriodEnd
+                ? '취소 예약됨'
+                : '구독 취소'}
             </Button>
           </section>
         )}

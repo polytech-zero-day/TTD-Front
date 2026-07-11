@@ -6,6 +6,7 @@ import StatCard from '../components/StatCard';
 import Tabs from '../components/Tabs';
 import RankingTable from '../components/RankingTable';
 import Select from '@/components/ui/Select.tsx';
+import Button from '@/components/ui/Button';
 import { getApiErrorMessage } from '@/lib/api/client';
 import {
   fetchLeaderboard,
@@ -17,12 +18,34 @@ import type { ProblemSummary } from '@/types/problem';
 
 type TabKey = 'overall' | 'byProblem';
 
+function InsufficientLeaderboardData({
+  isLoggedIn,
+  onBrowseProblems,
+}: {
+  isLoggedIn: boolean;
+  onBrowseProblems: () => void;
+}) {
+  return (
+    <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-5 py-10 text-center">
+      <p className="text-base font-semibold text-gallery">
+        아직 리더보드 데이터가 충분하지 않습니다.
+      </p>
+      <p className="text-sm text-santas-gray">
+        첫 번째 응시 결과를 제출해 랭킹을 만들어보세요.
+      </p>
+      <Button variant="outline" size="sm" onClick={onBrowseProblems}>
+        {isLoggedIn ? '문제 풀러 가기' : '문제 둘러보기'}
+      </Button>
+    </div>
+  );
+}
+
 export default function Leaderboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overall');
   const [problems, setProblems] = useState<ProblemSummary[]>([]);
   const [selectedProblemId, setSelectedProblemId] = useState<number | null>(
-    null,
+    null
   );
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
   const [ready, setReady] = useState(false);
@@ -55,8 +78,6 @@ export default function Leaderboard() {
     if (activeTab === 'byProblem' && selectedProblemId === null) return;
 
     let canceled = false;
-    setLeaderboard(null); // 탭 전환 중 통계 카드 "—"로 리셋
-
     const params =
       activeTab === 'byProblem'
         ? { problemId: selectedProblemId as number }
@@ -74,9 +95,7 @@ export default function Leaderboard() {
           navigate('/', { replace: true });
         } else {
           // 케이스 A — 문제별 랭킹은 백엔드 message 우선
-          toast.error(
-            getApiErrorMessage(err, '랭킹을 불러오지 못했습니다.'),
-          );
+          toast.error(getApiErrorMessage(err, '랭킹을 불러오지 못했습니다.'));
         }
       });
 
@@ -98,6 +117,7 @@ export default function Leaderboard() {
 
   const stats = leaderboard?.stats ?? null;
   const rows = leaderboard?.rows ?? [];
+  const hasSufficientRankingData = rows.length >= 2;
 
   const avgAttemptsText =
     stats?.avgTopAttempts !== null && stats?.avgTopAttempts !== undefined
@@ -117,6 +137,16 @@ export default function Leaderboard() {
     stats?.myPercentile !== null && stats?.myPercentile !== undefined
       ? `상위 ${stats.myPercentile}%`
       : '집계 없음';
+  const rankingContent = !leaderboard ? (
+    <p className="px-5 py-6 text-[13px] text-santas-gray">불러오는 중…</p>
+  ) : hasSufficientRankingData ? (
+    <RankingTable entries={rows} />
+  ) : (
+    <InsufficientLeaderboardData
+      isLoggedIn={isLoggedIn}
+      onBrowseProblems={() => navigate('/problems')}
+    />
+  );
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
@@ -156,53 +186,53 @@ export default function Leaderboard() {
         </section>
 
         {activeTab === 'overall' ? (
-          <div className="flex flex-col max-h-[821px] overflow-hidden bg-mirage border border-gallery-9 shadow-[0_1px_2px_rgba(0,0,0,0.28)] rounded-xl">
+          <div className="flex max-h-[821px] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
             <div className="flex items-center p-5">
               <div>
-                <div className="text-[14.6px] font-semibold text-gallery">전체 랭킹</div>
-                <div className="text-xs text-santas-gray mt-1">품질·효율 종합 점수 기준</div>
+                <div className="text-[14.6px] font-semibold text-gallery">
+                  전체 랭킹
+                </div>
+                <div className="mt-1 text-xs text-santas-gray">
+                  품질·효율 종합 점수 기준
+                </div>
               </div>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
-              {leaderboard ? (
-                <RankingTable entries={rows} />
-              ) : (
-                <p className="px-5 py-6 text-[13px] text-santas-gray">
-                  불러오는 중…
-                </p>
-              )}
+            <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto">
+              {rankingContent}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col max-h-[821px] overflow-hidden bg-mirage border border-gallery-9 shadow-[0_1px_2px_rgba(0,0,0,0.28)] rounded-xl">
-            <div className="flex items-center justify-between p-5 gap-4">
+          <div className="flex max-h-[821px] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+            <div className="flex items-center justify-between gap-4 p-5">
               <div>
-                <div className="text-[14.6px] font-semibold text-gallery">문제별 랭킹</div>
-                <div className="text-xs text-santas-gray mt-1">
+                <div className="text-[14.6px] font-semibold text-gallery">
+                  문제별 랭킹
+                </div>
+                <div className="mt-1 text-xs text-santas-gray">
                   선택한 문제 기준 상위 랭킹
                 </div>
               </div>
               <Select
                 variant="form"
-                className="min-w-56 max-w-96"
-                value={selectedProblemId !== null ? String(selectedProblemId) : ''}
+                className="max-w-96 min-w-56"
+                value={
+                  selectedProblemId !== null ? String(selectedProblemId) : ''
+                }
                 onChange={(e) => setSelectedProblemId(Number(e.target.value))}
               >
                 {problems.map((p) => (
-                  <option key={p.id} value={String(p.id)} className="bg-ebony text-gallery">
+                  <option
+                    key={p.id}
+                    value={String(p.id)}
+                    className="bg-ebony text-gallery"
+                  >
                     {p.title}
                   </option>
                 ))}
               </Select>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-themed">
-              {leaderboard ? (
-                <RankingTable entries={rows} />
-              ) : (
-                <p className="px-5 py-6 text-[13px] text-santas-gray">
-                  불러오는 중…
-                </p>
-              )}
+            <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto">
+              {rankingContent}
             </div>
           </div>
         )}
