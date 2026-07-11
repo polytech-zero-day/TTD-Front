@@ -186,7 +186,7 @@ export default function ResultPage() {
         <section className="flex flex-col gap-5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
           <div>
             <h2 className="text-xl font-bold text-gallery">채점 총평</h2>
-            <p className="text-sm font-medium text-santas-gray mt-1">
+            <p className="text-sm font-medium text-santas-gray mt-2">
               AI 루브릭 채점 — 최종 결과물과 대화 이력을 함께 평가
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function ResultPage() {
           <div className="flex-1 flex flex-col gap-5 p-[25px] bg-mirage border border-gallery-9 rounded-xl">
             <div>
               <h2 className="text-xl font-bold text-gallery">품질 vs 효율성</h2>
-              <p className="text-sm font-medium text-santas-gray mt-1">
+              <p className="text-sm font-medium text-santas-gray mt-2">
                 전체 응시자 대비 내 위치 · 상위 10%는 강조 표시
               </p>
             </div>
