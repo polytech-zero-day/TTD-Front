@@ -7,7 +7,6 @@ import { ApiError } from '@/lib/api/client';
 import { subscribe } from '@/lib/api/subscription';
 import { BillingKeyIssueError, issueBillingKey } from '@/lib/payment/portone';
 
-const dummyUser = { name: '김지수', plan: 'FREE' as const };
 
 const paidPlan = plans.find((plan) => plan.id === 'PAID');
 
@@ -36,11 +35,7 @@ export default function PaymentPage() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar
-        active="pricing"
-        userName={dummyUser.name}
-        plan={dummyUser.plan}
-      />
+      <Topbar active="pricing" />
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-2 px-5 pt-[62px] pb-20">
         <h1 className="pb-2.5 text-[18.9px] font-bold text-gallery">

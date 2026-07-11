@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Topbar from '../components/Topbar';
 import ProblemCard from '../components/ProblemCard';
-import { dummyViewer } from '../data/dummyProblems';
 import { fetchProblems } from '@/lib/api/problems';
 import {
   TYPE_FILTERS,
@@ -68,11 +67,7 @@ export default function ProblemListPage() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar
-        active="catalog"
-        userName={dummyViewer.name}
-        plan={dummyViewer.plan}
-      />
+      <Topbar active="catalog" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-6 px-5 pt-8 pb-20">
         {/* 페이지 제목 */}

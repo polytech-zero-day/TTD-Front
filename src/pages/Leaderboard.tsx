@@ -85,7 +85,7 @@ export default function Leaderboard() {
   if (!ready || !profile) {
     return (
       <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-        <Topbar active="leaderboard" userName="" plan="FREE" />
+        <Topbar active="leaderboard" />
         <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">
           <p className="text-[13px] text-santas-gray">불러오는 중…</p>
         </main>
@@ -117,7 +117,7 @@ export default function Leaderboard() {
 
   return (
     <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
-      <Topbar active="leaderboard" userName={profile.nickname} plan="FREE" />
+      <Topbar active="leaderboard" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">
         <h1 className="text-xl font-bold text-gallery">리더보드</h1>
