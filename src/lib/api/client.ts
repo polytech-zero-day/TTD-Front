@@ -55,7 +55,7 @@ async function refreshAccessToken(): Promise<boolean> {
         setTokens(body.data);
         return true;
       } catch {
-        clearTokens();
+        // 네트워크 단절은 인증 만료가 아니다. 토큰을 보존해 연결 복구 후 세션을 이어간다.
         return false;
       } finally {
         refreshInFlight = null;

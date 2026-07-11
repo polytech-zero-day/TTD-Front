@@ -1,11 +1,14 @@
 import { apiFetch } from '@/lib/api/client';
 import type { SubscriptionResponse } from '@/types/subscription';
 
-// GET /api/subscriptions/me — 구독 이력이 없는 계정의 에러 응답과 네트워크 장애를
-// 스펙상 구분할 방법이 없어 둘 다 null(=FREE)로 정규화한다. 실패 원인은 콘솔로만 남긴다.
+/** 현재 구독 조회의 원본 요청. 연결·인증 오류를 호출부에서 구분해야 할 때 사용한다. */
+export const fetchMySubscription = () =>
+  apiFetch<SubscriptionResponse>('/api/subscriptions/me');
+
+// 구독 이력이 없는 계정은 FREE로 정규화하는 화면용 편의 함수.
 export async function getMySubscription(): Promise<SubscriptionResponse | null> {
   try {
-    return await apiFetch<SubscriptionResponse>('/api/subscriptions/me');
+    return await fetchMySubscription();
   } catch (err) {
     console.error('[subscription] failed to load current subscription', err);
     return null;
@@ -19,4 +22,4 @@ export const subscribe = (billingKey: string) =>
   });
 
 export const cancelSubscription = () =>
-  apiFetch<void>('/api/subscriptions', { method: 'DELETE' });
+  apiFetch<SubscriptionResponse>('/api/subscriptions', { method: 'DELETE' });

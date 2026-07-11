@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiFetch } from './client';
-import { clearTokens, setTokens } from '@/lib/auth/session';
+import { clearTokens, isAuthenticated, setTokens } from '@/lib/auth/session';
 
 function jsonResponse(body: unknown, ok = true, status = 200) {
   return {
@@ -87,5 +87,27 @@ describe('apiFetch', () => {
     await expect(apiFetch('/api/attempts')).rejects.toThrow(
       '요청 처리 중 문제가 발생했습니다.'
     );
+  });
+
+  it('토큰 재발급 요청이 네트워크 오류면 기존 세션을 유지한다', async () => {
+    setTokens({
+      accessToken: 'expired-token',
+      refreshToken: 'refresh-token',
+      tokenType: 'Bearer',
+      expiresInSeconds: 1800,
+    });
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { success: false, errorCode: 'UNAUTHORIZED', message: '인증이 만료되었습니다.' },
+          false,
+          401
+        )
+      )
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+    await expect(apiFetch('/api/users/me')).rejects.toThrow('인증이 만료되었습니다.');
+
+    expect(isAuthenticated()).toBe(true);
   });
 });
