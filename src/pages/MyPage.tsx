@@ -210,7 +210,7 @@ export default function MyPage() {
                           <button
                             type="button"
                             onClick={() => goToAttempt(item)}
-                            className="cursor-pointer text-left text-wedgewood hover:text-wedgewood/80 hover:underline"
+                            className="cursor-pointer text-left text-gallery hover:text-wedgewood/80 hover:underline"
                           >
                             {item.problemTitle}
                           </button>
