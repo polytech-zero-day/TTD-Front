@@ -4,10 +4,18 @@ import type { Plan } from '../../../types/pricing';
 interface PlanCardProps {
   plan: Plan;
   isCurrent: boolean;
+  isActionDisabled?: boolean;
+  actionLabel?: string;
   onSelect: () => void;
 }
 
-export default function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
+export default function PlanCard({
+  plan,
+  isCurrent,
+  isActionDisabled = false,
+  actionLabel,
+  onSelect,
+}: PlanCardProps) {
   return (
     <div
       className={`relative flex flex-1 flex-col gap-4 rounded-xl border bg-mirage p-[27px] shadow-[0_1px_2px_rgba(0,0,0,0.28)] ${
@@ -59,13 +67,13 @@ export default function PlanCard({ plan, isCurrent, onSelect }: PlanCardProps) {
       </ul>
 
       <Button
-        variant={isCurrent ? 'muted' : 'primary'}
+        variant={isCurrent || isActionDisabled ? 'muted' : 'primary'}
         size="lg"
-        disabled={isCurrent}
-        className={`mt-auto w-full ${isCurrent ? 'opacity-45' : ''}`}
+        disabled={isCurrent || isActionDisabled}
+        className={`mt-auto w-full ${isCurrent || isActionDisabled ? 'opacity-45' : ''}`}
         onClick={onSelect}
       >
-        {isCurrent ? '현재 플랜' : '업그레이드하기'}
+        {actionLabel ?? (isCurrent ? '현재 플랜' : '업그레이드하기')}
       </Button>
     </div>
   );

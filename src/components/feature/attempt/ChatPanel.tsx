@@ -10,7 +10,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
-import Select from '@/components/ui/Select.tsx';
 
 interface Props {
   state: AttemptState;
@@ -22,7 +21,7 @@ interface Props {
 
 function placeholderFor(state: AttemptState) {
   if (state.phase === 'waiting') return '응답을 기다리는 중….';
-  if (state.usage.messagesUsed >= state.usage.messagesLimit)
+  if (!state.usage.unlimited && state.usage.messagesUsed >= state.usage.messagesLimit)
     return '메시지를 모두 사용했습니다';
   return 'AI에게 보낼 프롬프트를 입력하세요…';
 }
@@ -36,8 +35,8 @@ export default function ChatPanel({
 }: Props) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { usage, phase, messages } = state;
-  const exhausted = usage.messagesUsed >= usage.messagesLimit;
+  const { usage, phase, messages, chatModel } = state;
+  const exhausted = !usage.unlimited && usage.messagesUsed >= usage.messagesLimit;
   const locked = isInputLocked(state);
 
   useEffect(() => {
@@ -54,15 +53,7 @@ export default function ChatPanel({
     <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-x border-gallery-9">
       <div className="flex shrink-0 items-center justify-between border-b border-gallery-9 px-5 py-3">
         <span className="text-sm font-semibold text-gallery">AI 채팅</span>
-        <Badge tone="neutral">기본 모델</Badge>
-      </div>
-      <div className="flex shrink-0 items-center gap-2 px-5 py-2.5">
-        <Select disabled className="flex-1">
-          <option>GPT-5.4 mini (기본)</option>
-        </Select>
-        <span className="rounded-md bg-[rgba(217,164,65,0.16)] px-2.5 py-1 text-[11px] font-semibold text-[#d9a441]">
-          PRO 모델 잠금
-        </span>
+        {chatModel && <Badge tone="neutral">{chatModel}</Badge>}
       </div>
       <div
         ref={scrollRef}
@@ -145,7 +136,7 @@ export default function ChatPanel({
                   {usage.messagesUsed}
                   <span className="text-xs font-normal text-santas-gray">
                     {' '}
-                    / {usage.messagesLimit}회
+                    / {usage.unlimited ? '무제한' : `${usage.messagesLimit}회`}
                   </span>
                 </div>
               </div>
@@ -179,10 +170,10 @@ export default function ChatPanel({
       <div className="shrink-0 border-t border-gallery-9 px-5 py-3">
         <div className="mb-2.5 flex items-center gap-3 text-xs text-santas-gray">
           <span>
-            메시지 {usage.messagesUsed}/{usage.messagesLimit}
+            메시지 {usage.messagesUsed}/{usage.unlimited ? '무제한' : usage.messagesLimit}
           </span>
           <UsageBar
-            ratio={usage.messagesUsed / usage.messagesLimit}
+            ratio={usage.unlimited ? 0 : usage.messagesUsed / usage.messagesLimit}
             danger={exhausted}
           />
           <span>

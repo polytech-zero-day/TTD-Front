@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 interface BadgeProps {
-  tone?: 'accent' | 'neutral' | 'pill' | 'success';
+  tone?: 'accent' | 'neutral' | 'pill' | 'success' | 'paid';
   children: ReactNode;
 }
 
@@ -13,6 +13,7 @@ export default function Badge({ tone = 'neutral', children }: BadgeProps) {
     neutral: 'rounded-md border border-gallery-9 text-santas-gray',
     pill: 'rounded-full bg-biscay text-jungle-mist',
     success: 'rounded-md bg-success-bg text-success',
+    paid: 'rounded-full border border-neptune/60 bg-neptune/15 text-neptune',
   }[tone];
 
   return (

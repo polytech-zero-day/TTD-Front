@@ -7,6 +7,7 @@ const baseUsage: AttemptUsage = {
   messagesLimit: 10,
   tokensUsed: 0,
   tokensBaseline: 3000,
+  unlimited: false,
 };
 
 const baseState: AttemptState = {
@@ -16,6 +17,7 @@ const baseState: AttemptState = {
   usage: baseUsage,
   remainingSeconds: 2700,
   draft: '',
+  chatModel: 'gpt-5.4-mini',
 };
 
 describe('isInputLocked', () => {
@@ -38,6 +40,15 @@ describe('isInputLocked', () => {
         usage: { ...baseUsage, messagesUsed: 10 },
       })
     ).toBe(true);
+  });
+
+  it('무제한(유료)이면 한도를 넘어도 잠기지 않는다', () => {
+    expect(
+      isInputLocked({
+        ...baseState,
+        usage: { ...baseUsage, messagesUsed: 20, unlimited: true },
+      })
+    ).toBe(false);
   });
 });
 

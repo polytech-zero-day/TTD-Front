@@ -25,17 +25,23 @@ export default function ResultPage() {
   const [data, setData] = useState<ResultPageData | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     Promise.all([
       getAttemptResult(Number(attemptId)),
       fetchScatterData(),
     ])
       .then(([result, scatter]) => {
+        if (cancelled) return;
         setData({ result, scatter });
       })
       .catch(() => {
+        if (cancelled) return;
         toast.error('채점 결과를 불러오지 못했습니다.');
         navigate('/problems', { replace: true });
       });
+    return () => {
+      cancelled = true;
+    };
   }, [attemptId, navigate]);
 
   const rubricItems = useMemo<RubricCriterionData[]>(
@@ -173,6 +179,19 @@ export default function ResultPage() {
                 {result.attemptOrdinal}/{result.maxAttempts}
               </span>
             </span>
+            {result.chatModel && (
+              <span className="text-santas-gray">
+                응시 모델:{' '}
+                <span className="text-gallery font-semibold">
+                  {result.chatModel}
+                </span>
+                {result.premium && (
+                  <span className="ml-1.5 rounded-full bg-biscay px-1.5 py-px text-[10px] font-bold text-jungle-mist">
+                    PAID
+                  </span>
+                )}
+              </span>
+            )}
           </div>
         </header>
 

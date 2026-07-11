@@ -9,6 +9,7 @@ export interface AttemptSnapshot {
   usage: AttemptUsage;
   messages: ChatMessage[];
   draft: string | null;
+  chatModel: string | null; // 이 응시가 사용하는 AI 모델(유료=상위 모델)
 }
 
 export interface AttemptMessageResult {
@@ -41,14 +42,20 @@ export interface AttemptResult {
   totalTokens: number;
   tokenBudget: number;
   artifact: string | null; // 사용자의 최종 제출 답변 (draft 확정본)
+  premium: boolean; // 유료 응시 여부
+  chatModel: string | null; // 이 응시가 사용한 AI 모델
 }
 
 // 시작 (진행 중 세션이 있으면 서버가 그 스냅샷을 그대로 반환 — 멱등)
-export const startAttempt = (problemId: number) =>
+export const startAttempt = (problemId: number, chatModel?: string) =>
   apiFetch<AttemptSnapshot>('/api/attempts', {
     method: 'POST',
-    body: JSON.stringify({ problemId }),
+    body: JSON.stringify({ problemId, chatModel }),
   });
+
+// 진행 중·채점 중인 기존 응시가 있으면 모델 선택 없이 복원한다.
+export const getCurrentAttempt = (problemId: number) =>
+  apiFetch<AttemptSnapshot>(`/api/attempts/current?problemId=${problemId}`);
 
 // 대화 — prevUsage 파라미터 삭제 (사용량은 서버가 계산해 내려줌)
 export const sendAttemptMessage = (attemptId: number, content: string) =>

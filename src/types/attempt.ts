@@ -2,7 +2,7 @@ export type AttemptPhase =
   'loading' | 'chatting' | 'waiting' | 'confirming' | 'grading' | 'failed';
 
 export type AttemptStatus =
-  'IN_PROGRESS' | 'GRADING' | 'GRADING_FAILED' | 'GRADED';
+  'IN_PROGRESS' | 'GRADING' | 'GRADING_FAILED' | 'GRADED' | 'ABANDONED';
 
 export interface ChatMessage {
   id: number | string; // 서버는 number, 낙관적 렌더링용 임시 메시지는 string
@@ -17,6 +17,7 @@ export interface AttemptUsage {
   messagesLimit: number;
   tokensUsed: number;
   tokensBaseline: number;
+  unlimited: boolean; // 유료 구독자 — 프롬프트 횟수 무제한
 }
 
 export interface AttemptState {
@@ -26,10 +27,12 @@ export interface AttemptState {
   usage: AttemptUsage;
   remainingSeconds: number;
   draft: string;
+  chatModel: string | null; // 이 응시가 사용하는 AI 모델(유료=상위 모델)
 }
 
 export const isInputLocked = (s: AttemptState) =>
-  s.phase !== 'chatting' || s.usage.messagesUsed >= s.usage.messagesLimit;
+  s.phase !== 'chatting' ||
+  (!s.usage.unlimited && s.usage.messagesUsed >= s.usage.messagesLimit);
 
 export const isOverBaseline = (u: AttemptUsage) =>
   u.tokensUsed > u.tokensBaseline;

@@ -30,8 +30,10 @@ export default function Leaderboard() {
 
   // 초기 로드: profile + problems (실패 시 케이스 B)
   useEffect(() => {
+    let cancelled = false;
     Promise.all([fetchMyProfile(), fetchProblems()])
       .then(([p, probs]) => {
+        if (cancelled) return;
         setProfile(p);
         setProblems(probs);
         const firstProblem = probs[0];
@@ -39,9 +41,13 @@ export default function Leaderboard() {
         setReady(true);
       })
       .catch(() => {
+        if (cancelled) return;
         toast.error('랭킹을 불러오지 못했습니다.');
         navigate('/', { replace: true });
       });
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   // 랭킹 페칭: activeTab / selectedProblemId 변화마다

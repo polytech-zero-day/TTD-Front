@@ -29,6 +29,8 @@ const makeResult = (over: Partial<AttemptResult>): AttemptResult => ({
   messages: [],
   totalTokens: 0,
   tokenBudget: 3000,
+  premium: false,
+  chatModel: 'gpt-5.4-mini',
   ...over,
 });
 
@@ -52,12 +54,19 @@ const snapshot: AttemptSnapshot = {
   attemptId: 7,
   status: 'IN_PROGRESS',
   remainingSeconds: 2700,
-  usage: { messagesUsed: 1, messagesLimit: 10, tokensUsed: 500, tokensBaseline: 3000 },
+  usage: {
+    messagesUsed: 1,
+    messagesLimit: 10,
+    tokensUsed: 500,
+    tokensBaseline: 3000,
+    unlimited: false,
+  },
   messages: [
     { id: 1, role: 'user', content: '질문1' },
     { id: 2, role: 'assistant', content: '답변1' },
   ],
   draft: '저장된 결과물',
+  chatModel: 'gpt-5.4-mini',
 };
 
 describe('useAttempt', () => {
@@ -82,10 +91,31 @@ describe('useAttempt', () => {
     expect(result.current.state.remainingSeconds).toBe(2700);
   });
 
+  it('PAID 모델 선택을 받은 뒤에만 해당 모델로 응시를 시작한다', async () => {
+    const { rerender } = renderHook(
+      ({ startRequested }) =>
+        useAttempt(1, vi.fn(), undefined, startRequested, 'gpt-5.4-mini'),
+      { initialProps: { startRequested: false } }
+    );
+
+    expect(startAttemptMock).not.toHaveBeenCalled();
+    rerender({ startRequested: true });
+
+    await waitFor(() =>
+      expect(startAttemptMock).toHaveBeenCalledWith(1, 'gpt-5.4-mini')
+    );
+  });
+
   it('메시지 전송에 성공하면 유저·AI 메시지가 추가되고 사용량이 서버 값으로 갱신된다', async () => {
     sendMessageMock.mockResolvedValue({
       message: { id: 3, role: 'assistant', content: '답변2' },
-      usage: { messagesUsed: 2, messagesLimit: 10, tokensUsed: 1200, tokensBaseline: 3000 },
+      usage: {
+        messagesUsed: 2,
+        messagesLimit: 10,
+        tokensUsed: 1200,
+        tokensBaseline: 3000,
+        unlimited: false,
+      },
     });
     const { result } = renderHook(() => useAttempt(1, vi.fn()));
     await waitFor(() => expect(result.current.state.phase).toBe('chatting'));

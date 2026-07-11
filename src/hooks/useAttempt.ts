@@ -21,9 +21,11 @@ const INITIAL: AttemptState = {
     messagesLimit: 10,
     tokensUsed: 0,
     tokensBaseline: 3000,
+    unlimited: false,
   },
   remainingSeconds: 0,
   draft: '',
+  chatModel: null,
 };
 
 const DRAFT_SAVE_DELAY_MS = 2000;
@@ -37,7 +39,9 @@ const isLivePhase = (phase: AttemptState['phase']) => LIVE_PHASES.includes(phase
 export function useAttempt(
   problemId: number,
   onGraded: (attemptId: number) => void,
-  onStartBlocked?: (message: string) => void
+  onStartBlocked?: (message: string) => void,
+  startRequested = true,
+  selectedChatModel?: string
 ) {
   const [state, setState] = useState<AttemptState>(INITIAL);
   const startedRef = useRef(false);
@@ -78,9 +82,10 @@ export function useAttempt(
 
   // 시작 + 새로고침 복원 (서버 스냅샷이 대화·draft·남은 시간까지 내려줌)
   useEffect(() => {
+    if (!startRequested) return;
     if (startedRef.current) return;
     startedRef.current = true;
-    startAttempt(problemId).then((snap) => {
+    startAttempt(problemId, selectedChatModel).then((snap) => {
       if (snap.status === 'GRADING_FAILED') {
         // 재진입했는데 채점 실패 상태면 바로 재채점 UI로
         setState((s) => ({ ...s, attemptId: snap.attemptId, phase: 'failed' }));
@@ -99,6 +104,7 @@ export function useAttempt(
         usage: snap.usage,
         remainingSeconds: snap.remainingSeconds,
         draft: snap.draft ?? '',
+        chatModel: snap.chatModel,
       });
     }).catch((err: unknown) => {
       // 응시 횟수 소진(QUOTA_EXCEEDED) 등 시작 불가 — 호출부에서 안내 후 이탈 처리
@@ -112,7 +118,7 @@ export function useAttempt(
       clearTimeout(draftTimerRef.current);
       clearInterval(pollTimerRef.current);
     };
-  }, [problemId, beginResultPolling]);
+  }, [problemId, beginResultPolling, startRequested, selectedChatModel]);
 
   // 카운트다운: 살아있는 페이즈에서 1초마다 순수 감소만 한다(부작용 없음).
   // deps는 phase만 — 콜백을 넣지 않아 매 렌더 리셋되지 않는다.
