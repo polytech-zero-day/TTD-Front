@@ -31,6 +31,7 @@ const makeResult = (over: Partial<AttemptResult>): AttemptResult => ({
   tokenBudget: 3000,
   premium: false,
   chatModel: 'gpt-5.4-mini',
+  artifact: null,
   ...over,
 });
 

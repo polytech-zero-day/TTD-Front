@@ -4,6 +4,7 @@ import Avatar from './ui/Avatar';
 import Badge from './ui/Badge';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { logout } from '@/lib/api/auth';
+import { isAuthenticated } from '@/lib/auth/session';
 
 type NavKey = 'catalog' | 'mypage' | 'leaderboard' | 'pricing';
 
@@ -22,6 +23,7 @@ export default function Topbar({ active }: TopbarProps) {
   // 사용자 정보는 전역 컨텍스트에서 읽는다 (페이지별 더미 주입 대체).
   const { name, plan, connectionStatus, refresh } = useCurrentUser();
   const navigate = useNavigate();
+  const isLoggedIn = isAuthenticated();
 
   async function handleLogout() {
     await logout(); // 서버 세션 무효화 + 로컬 토큰 정리
@@ -56,7 +58,7 @@ export default function Topbar({ active }: TopbarProps) {
       </nav>
 
       <div className="ml-auto flex items-center gap-3">
-        {connectionStatus === 'offline' && (
+        {isLoggedIn && connectionStatus === 'offline' && (
           <button
             type="button"
             onClick={() => void refresh()}
@@ -65,36 +67,48 @@ export default function Topbar({ active }: TopbarProps) {
             서버 연결 끊김 · 재시도
           </button>
         )}
-        <a href="/pricing" className="no-underline">
-          <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
-        </a>
-        <div className="flex items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px]">
-          <Avatar initial={name.charAt(0) || '?'} size="sm" />
-          <span className="text-[13px] text-gallery">{name || '게스트'}</span>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          aria-label="로그아웃"
-          title="로그아웃"
-          className="flex size-8 cursor-pointer items-center justify-center rounded-full text-santas-gray hover:bg-charade hover:text-gallery"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        {isLoggedIn ? (
+          <>
+            <a href="/pricing" className="no-underline">
+              <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
+            </a>
+            <div className="flex items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px]">
+              <Avatar initial={name.charAt(0) || '?'} size="sm" />
+              <span className="text-[13px] text-gallery">{name}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="로그아웃"
+              title="로그아웃"
+              className="flex size-8 cursor-pointer items-center justify-center rounded-full text-santas-gray hover:bg-charade hover:text-gallery"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="cursor-pointer rounded-lg bg-wedgewood px-4 py-2 text-sm font-medium text-white hover:bg-wedgewood/85"
           >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-        </button>
+            로그인
+          </button>
+        )}
       </div>
     </header>
   );

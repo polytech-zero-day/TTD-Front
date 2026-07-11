@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import { fetchProblem } from '@/lib/api/problems';
 import { getCurrentAttempt, type AttemptSnapshot } from '@/lib/api/attempt';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
+import { isAuthenticated } from '@/lib/auth/session';
 import {
   PROBLEM_TYPE_LABEL,
   type ProblemDetail as ProblemDetailData,
@@ -50,10 +51,12 @@ function ProblemDetail({
   problem,
   currentAttempt,
   isPaid,
+  isLoggedIn,
 }: {
   problem: ProblemDetailData;
   currentAttempt: AttemptSnapshot | null;
   isPaid: boolean;
+  isLoggedIn: boolean;
 }) {
   const {
     id,
@@ -163,15 +166,21 @@ function ProblemDetail({
             size="lg"
             // S-04(C파트) 응시 화면 라우트 연결 예정. 현재는 해당 라우트가 없어
             // 클릭 시 빈 화면이 나오는 것이 정상이며, S-04 완성 시 자연스럽게 연결됨.
-            onClick={() => (window.location.href = `/problems/${id}/attempt`)}
+            onClick={() => {
+              window.location.href = isLoggedIn
+                ? `/problems/${id}/attempt`
+                : '/login';
+            }}
           >
-            {attemptMeta?.action ?? '응시 시작하기'}
+            {attemptMeta?.action ?? (isLoggedIn ? '응시 시작하기' : '로그인 후 응시하기')}
           </Button>
           <span className="text-xs text-santas-gray">
             {attemptMeta?.hint ??
               (isPaid
                 ? 'PAID 플랜은 문제·프롬프트 횟수 제한 없이 응시할 수 있습니다.'
-                : `최대 ${maxAttempts}회 응시 가능 · 문제당 프롬프트 3회 제한`)}
+                : isLoggedIn
+                  ? `최대 ${maxAttempts}회 응시 가능 · 문제당 프롬프트 3회 제한`
+                  : '응시를 시작하려면 로그인해주세요.')}
           </span>
         </div>
       </div>
@@ -211,6 +220,7 @@ function NotFound() {
 export default function ProblemDetailPage() {
   const { id } = useParams();
   const { plan } = useCurrentUser();
+  const isLoggedIn = isAuthenticated();
   const [problem, setProblem] = useState<ProblemDetailData | null>(null);
   const [currentAttempt, setCurrentAttempt] = useState<AttemptSnapshot | null>(null);
   const [notFound, setNotFound] = useState(false); // 미존재·비공개 문제(404) 포함 조회 실패
@@ -225,16 +235,19 @@ export default function ProblemDetailPage() {
       .catch(() => {
         if (!cancelled) setNotFound(true);
       });
-    // 진행·채점 중 세션이 없는 404는 정상이다. 상세 화면에서는 새 응시 CTA를 그대로 보여준다.
-    getCurrentAttempt(problemId)
-      .then((attempt) => {
-        if (!cancelled) setCurrentAttempt(attempt);
-      })
-      .catch(() => {});
+    // 비로그인 사용자는 공개 상세만 본다. 개인 응시 세션 조회는 인증 사용자에게만 요청한다.
+    if (isLoggedIn) {
+      // 진행·채점 중 세션이 없는 404는 정상이다. 상세 화면에서는 새 응시 CTA를 그대로 보여준다.
+      getCurrentAttempt(problemId)
+        .then((attempt) => {
+          if (!cancelled) setCurrentAttempt(attempt);
+        })
+        .catch(() => {});
+    }
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, isLoggedIn]);
 
   // 서버가 내려준 남은 시간을 화면에서만 1초씩 줄인다. 매초 API를 호출하지 않아도
   // 상세 화면의 배지와 실제 응시 타이머가 자연스럽게 함께 흐른다.
@@ -271,6 +284,7 @@ export default function ProblemDetailPage() {
           problem={problem}
           currentAttempt={currentAttempt}
           isPaid={plan === 'PAID'}
+          isLoggedIn={isLoggedIn}
         />
       )}
     </div>
