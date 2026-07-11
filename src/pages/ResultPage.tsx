@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import RubricItem from '../components/feature/result/RubricItem';
 import AttemptTimelineItem from '../components/feature/result/AttemptTimelineItem';
 import { getAttemptResult, type AttemptResult } from '@/lib/api/attempt';
-import type { AttemptRecord, RubricCriterionData } from '../data/dummyResult';
+import type { AttemptRecord, RubricCriterionData } from '../types/result';
 
 
 // "2026-07-10T15:34:28.123" → "2026-07-10 15:34:28"

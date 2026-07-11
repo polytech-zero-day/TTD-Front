@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { AttemptRecord } from '@/data/dummyResult';
+import type { AttemptRecord } from '@/types/result';
 
 interface AttemptTimelineItemProps {
   attempt: AttemptRecord;
