@@ -40,6 +40,7 @@ export interface AttemptResult {
   messages: ChatMessage[]; // tokensUsed·createdAt 포함
   totalTokens: number;
   tokenBudget: number;
+  artifact: string | null; // 사용자의 최종 제출 답변 (draft 확정본)
 }
 
 // 시작 (진행 중 세션이 있으면 서버가 그 스냅샷을 그대로 반환 — 멱등)
