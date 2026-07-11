@@ -20,11 +20,12 @@ const NAV_ITEMS: { key: NavKey; label: string; path: string }[] = [
 
 export default function Topbar({ active }: TopbarProps) {
   // 사용자 정보는 전역 컨텍스트에서 읽는다 (페이지별 더미 주입 대체).
-  const { name, plan } = useCurrentUser();
+  const { name, plan, refresh } = useCurrentUser();
   const navigate = useNavigate();
 
   async function handleLogout() {
     await logout(); // 서버 세션 무효화 + 로컬 토큰 정리
+    await refresh(); // 토큰이 사라졌으니 헤더를 게스트로 갱신
     toast.success('로그아웃되었습니다.');
     navigate('/login');
   }
