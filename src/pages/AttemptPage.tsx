@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import AttemptTopbar from '@/components/feature/attempt/AttemptTopbar';
 import ProblemPanel from '@/components/feature/attempt/ProblemPanel';
 import ChatPanel from '@/components/feature/attempt/ChatPanel';
@@ -107,21 +108,33 @@ export default function AttemptPage() {
         chatModel={state.chatModel}
         onExit={() => navigate(`/problems/${problemId}`)}
       />
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(200px,0.9fr)_minmax(300px,1.5fr)_minmax(200px,0.8fr)] overflow-hidden">
-        <ProblemPanel problem={problem} />
-        <ChatPanel
-          state={state}
-          onSend={send}
-          onCancelConfirm={cancelConfirm}
-          onConfirmSubmit={confirmSubmit}
-          onRegrade={retryGrading}
-        />
-        <SubmitPanel
-          state={state}
-          onDraftChange={setDraft}
-          onSubmit={openConfirm}
-        />
-      </div>
+      <PanelGroup
+        direction="horizontal"
+        autoSaveId="attempt-panel-layout"
+        className="min-h-0 flex-1 overflow-hidden"
+      >
+        <Panel defaultSize={28} minSize={15}>
+          <ProblemPanel problem={problem} />
+        </Panel>
+        <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
+        <Panel defaultSize={47} minSize={22}>
+          <ChatPanel
+            state={state}
+            onSend={send}
+            onCancelConfirm={cancelConfirm}
+            onConfirmSubmit={confirmSubmit}
+            onRegrade={retryGrading}
+          />
+        </Panel>
+        <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
+        <Panel defaultSize={25} minSize={15}>
+          <SubmitPanel
+            state={state}
+            onDraftChange={setDraft}
+            onSubmit={openConfirm}
+          />
+        </Panel>
+      </PanelGroup>
       {plan === 'PAID' && !startRequested && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
           <section
