@@ -148,7 +148,7 @@ export default function Topbar({ active }: TopbarProps) {
                 <div
                   role="dialog"
                   aria-label="계정 카드"
-                  className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-2xl"
+                  className="absolute top-full right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-2xl"
                 >
                   <div className="flex items-center gap-3 p-4">
                     <Avatar initial={name.charAt(0) || '?'} size="lg" />
@@ -162,8 +162,7 @@ export default function Topbar({ active }: TopbarProps) {
                         </Badge>
                       </div>
                       <div className="mt-0.5 truncate text-xs text-santas-gray">
-                        {profileEmail ??
-                          (isLoadingCard ? '불러오는 중…' : '—')}
+                        {profileEmail ?? (isLoadingCard ? '불러오는 중…' : '—')}
                       </div>
                     </div>
                   </div>
