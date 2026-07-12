@@ -10,10 +10,6 @@ export function fetchAdminProblems() {
   return apiFetch<AdminProblem[]>('/api/admin/problems');
 }
 
-export function fetchAdminProblem(id: number) {
-  return apiFetch<AdminProblem>(`/api/admin/problems/${id}`);
-}
-
 export function createAdminProblem(input: CreateProblemInput) {
   return apiFetch<AdminProblem>('/api/admin/problems', {
     method: 'POST',
