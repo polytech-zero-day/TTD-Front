@@ -1,6 +1,12 @@
 import Avatar from './ui/Avatar';
 import Badge from './ui/Badge';
-import { medalForRank, type LeaderboardEntry } from '../data/dummyLeaderboard';
+import type { LeaderboardEntry } from '@/lib/api/leaderboard';
+
+const MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+function medalForRank(rank: number): string | null {
+  return MEDALS[rank] ?? null;
+}
 
 interface RankingTableProps {
   entries: LeaderboardEntry[];
