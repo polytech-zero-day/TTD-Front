@@ -11,9 +11,14 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { cancelSubscription, getMySubscription } from '@/lib/api/subscription';
+import { getApiErrorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import type { SubscriptionResponse } from '@/types/subscription';
-import { fetchMyProfile, type MyProfile } from '@/lib/api/userProfile';
+import {
+  fetchMyProfile,
+  updateNickname,
+  type MyProfile,
+} from '@/lib/api/userProfile';
 import {
   fetchMyAttempts,
   fetchMyStats,
@@ -40,6 +45,9 @@ export default function MyPage() {
   const navigate = useNavigate();
   const { plan, refresh } = useCurrentUser();
   const [data, setData] = useState<MyPageData | null>(null);
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [nicknameDraft, setNicknameDraft] = useState('');
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
 
   function goToAttempt(item: MyAttemptSummary) {
     if (item.status === 'GRADED') {
@@ -86,6 +94,35 @@ export default function MyPage() {
   }
 
   const { profile, attempts, stats, scatter } = data;
+
+  function startEditNickname() {
+    setNicknameDraft(profile.nickname);
+    setIsEditingNickname(true);
+  }
+
+  function cancelEditNickname() {
+    setIsEditingNickname(false);
+  }
+
+  async function saveNickname() {
+    const trimmed = nicknameDraft.trim();
+    if (!trimmed || isSavingNickname) return;
+    setIsSavingNickname(true);
+    try {
+      const updated = await updateNickname(trimmed);
+      setData((current) =>
+        current ? { ...current, profile: updated } : current
+      );
+      await refresh(); // Topbar 등 전역 사용자명 갱신
+      toast.success('닉네임이 변경되었습니다.');
+      setIsEditingNickname(false);
+    } catch (err) {
+      // 케이스 A: 백엔드 유효성 메시지(@NotBlank/@Size)를 그대로 노출
+      toast.error(getApiErrorMessage(err, '닉네임 변경에 실패했습니다.'));
+    } finally {
+      setIsSavingNickname(false);
+    }
+  }
 
   async function handleCancelSubscription() {
     const nextBillingAt = data?.subscription?.nextBillingAt;
@@ -140,10 +177,92 @@ export default function MyPage() {
           <Avatar initial={profile.nickname.charAt(0)} size="lg" />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-gallery">
-                {profile.nickname}
-              </span>
-              <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
+              {isEditingNickname ? (
+                <>
+                  <input
+                    type="text"
+                    value={nicknameDraft}
+                    onChange={(e) => setNicknameDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void saveNickname();
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelEditNickname();
+                      }
+                    }}
+                    disabled={isSavingNickname}
+                    maxLength={30}
+                    autoFocus
+                    aria-label="새 닉네임"
+                    className="min-w-0 rounded-md border border-gallery-9 bg-charade px-3 py-1 text-2xl font-bold text-gallery outline-none focus:border-wedgewood disabled:opacity-60"
+                  />
+                  <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
+                  <button
+                    type="button"
+                    onClick={() => void saveNickname()}
+                    disabled={!nicknameDraft.trim() || isSavingNickname}
+                    aria-label="닉네임 저장"
+                    title="저장 (Enter)"
+                    className="flex size-8 cursor-pointer items-center justify-center rounded-full text-santas-gray hover:bg-charade hover:text-gallery disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-santas-gray"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M3 8.5 6.5 12 13 4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEditNickname}
+                    disabled={isSavingNickname}
+                    aria-label="닉네임 변경 취소"
+                    title="취소 (Esc)"
+                    className="flex size-8 cursor-pointer items-center justify-center rounded-full text-santas-gray hover:bg-charade hover:text-gallery disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 4 L12 12 M12 4 L4 12"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-bold text-gallery">
+                    {profile.nickname}
+                  </span>
+                  <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
+                  <button
+                    type="button"
+                    onClick={startEditNickname}
+                    className="cursor-pointer rounded-md px-2 py-1 text-xs text-santas-gray hover:bg-charade hover:text-gallery"
+                  >
+                    닉네임 변경
+                  </button>
+                </>
+              )}
             </div>
             <div className="text-base text-santas-gray">
               가입일 {joinedAt} · 총 제출 {stats.totalAttempts}회 · 최근 응시{' '}
