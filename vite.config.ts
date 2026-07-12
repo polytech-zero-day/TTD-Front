@@ -13,5 +13,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom', // 훅 테스트(renderHook)용 DOM 환경
+    // Playwright E2E는 별도 러너로 실행한다. Vitest가 e2e/*.spec.ts를 수집하지 않게 분리한다.
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**', 'coverage/**'],
   },
 });
