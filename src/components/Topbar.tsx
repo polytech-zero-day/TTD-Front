@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Avatar from './ui/Avatar';
@@ -5,6 +6,8 @@ import Badge from './ui/Badge';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { logout } from '@/lib/api/auth';
 import { isAuthenticated } from '@/lib/auth/session';
+import { fetchMyProfile } from '@/lib/api/userProfile';
+import { fetchMyStats, type MyAttemptStats } from '@/lib/api/myPage';
 
 type NavKey = 'catalog' | 'mypage' | 'leaderboard' | 'pricing';
 
@@ -24,6 +27,63 @@ export default function Topbar({ active }: TopbarProps) {
   const { name, plan, connectionStatus, refresh } = useCurrentUser();
   const navigate = useNavigate();
   const isLoggedIn = isAuthenticated();
+
+  // 계정 카드 팝업 — 이메일·통계는 카드가 처음 열릴 때 lazy fetch 후 캐시한다.
+  // Topbar는 모든 페이지에 렌더링되므로 페이지 로드마다 요청을 발생시키지 않는다.
+  const accountRef = useRef<HTMLDivElement>(null);
+  const [isCardOpen, setIsCardOpen] = useState(false);
+  const [profileEmail, setProfileEmail] = useState<string | null>(null);
+  const [stats, setStats] = useState<MyAttemptStats | null>(null);
+  const [isLoadingCard, setIsLoadingCard] = useState(false);
+
+  async function ensureCardData() {
+    if (profileEmail !== null && stats !== null) return; // 캐시 히트
+    setIsLoadingCard(true);
+    try {
+      const tasks: Promise<void>[] = [];
+      if (profileEmail === null) {
+        tasks.push(fetchMyProfile().then((p) => setProfileEmail(p.email)));
+      }
+      if (stats === null) {
+        tasks.push(fetchMyStats().then((s) => setStats(s)));
+      }
+      await Promise.all(tasks);
+    } catch {
+      // 실패 시 캐시하지 않음 — 다음 열림 때 재시도된다
+    } finally {
+      setIsLoadingCard(false);
+    }
+  }
+
+  function toggleCard() {
+    setIsCardOpen((prev) => {
+      const next = !prev;
+      if (next) void ensureCardData();
+      return next;
+    });
+  }
+
+  // 바깥 클릭·ESC로 카드 닫기
+  useEffect(() => {
+    if (!isCardOpen) return;
+    function handlePointer(e: MouseEvent) {
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(e.target as Node)
+      ) {
+        setIsCardOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setIsCardOpen(false);
+    }
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isCardOpen]);
 
   async function handleLogout() {
     await logout(); // 서버 세션 무효화 + 로컬 토큰 정리
@@ -72,9 +132,102 @@ export default function Topbar({ active }: TopbarProps) {
             <a href="/pricing" className="no-underline">
               <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
             </a>
-            <div className="flex items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px]">
-              <Avatar initial={name.charAt(0) || '?'} size="sm" />
-              <span className="text-[13px] text-gallery">{name}</span>
+            <div ref={accountRef} className="relative">
+              <button
+                type="button"
+                onClick={toggleCard}
+                aria-haspopup="dialog"
+                aria-expanded={isCardOpen}
+                aria-label="계정 메뉴 열기"
+                className="flex cursor-pointer items-center gap-2 rounded-full bg-charade py-[5px] pr-[10px] pl-[5px] hover:bg-charade/80"
+              >
+                <Avatar initial={name.charAt(0) || '?'} size="sm" />
+                <span className="text-[13px] text-gallery">{name}</span>
+              </button>
+              {isCardOpen && (
+                <div
+                  role="dialog"
+                  aria-label="계정 카드"
+                  className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-2xl"
+                >
+                  <div className="flex items-center gap-3 p-4">
+                    <Avatar initial={name.charAt(0) || '?'} size="lg" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-gallery">
+                          {name}
+                        </span>
+                        <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>
+                          {plan}
+                        </Badge>
+                      </div>
+                      <div className="mt-0.5 truncate text-xs text-santas-gray">
+                        {profileEmail ??
+                          (isLoadingCard ? '불러오는 중…' : '—')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gallery-9" />
+
+                  <div className="flex flex-col gap-2 p-4">
+                    {stats ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-santas-gray">
+                            최고 점수
+                          </span>
+                          <span className="text-sm font-semibold text-gallery">
+                            {stats.bestScore ?? '—'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-santas-gray">
+                            누적 응시
+                          </span>
+                          <span className="text-sm font-semibold text-gallery">
+                            {stats.totalAttempts}건 완료율{' '}
+                            {stats.completionRate}%
+                          </span>
+                        </div>
+                      </>
+                    ) : isLoadingCard ? (
+                      <div className="text-xs text-santas-gray">
+                        불러오는 중…
+                      </div>
+                    ) : (
+                      <div className="text-xs text-santas-gray">
+                        통계를 불러오지 못했습니다.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-gallery-9" />
+
+                  <div className="flex flex-col gap-2 p-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCardOpen(false);
+                        navigate('/mypage');
+                      }}
+                      className="w-full cursor-pointer rounded-lg bg-wedgewood px-3 py-2 text-sm font-medium text-white hover:bg-wedgewood/85"
+                    >
+                      마이페이지 보기
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCardOpen(false);
+                        void handleLogout();
+                      }}
+                      className="w-full cursor-pointer rounded-lg border border-gallery-9 bg-charade px-3 py-2 text-sm font-medium text-santas-gray hover:bg-biscay hover:text-gallery"
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <button
               type="button"
