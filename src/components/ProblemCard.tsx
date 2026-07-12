@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router';
 import Badge from './ui/Badge';
 import { PROBLEM_TYPE_LABEL, type ProblemSummary } from '../types/problem';
 
@@ -10,12 +11,13 @@ interface ProblemCardProps {
 // 카드 전체가 클릭 영역이며 문제 상세(S-03)로 이동한다.
 // 설명·누적 응시 인원은 목록 API 미제공 필드라 제외 (집계 필드 추가 시 복원 검토).
 export default function ProblemCard({ problem, isPaid }: ProblemCardProps) {
+  const navigate = useNavigate();
   const { id, title, difficulty, type, maxAttempts } = problem;
 
   return (
     <button
       type="button"
-      onClick={() => (window.location.href = `/problems/${id}`)}
+      onClick={() => navigate(`/problems/${id}`)}
       className="flex cursor-pointer flex-col gap-3 rounded-xl border border-gallery-9 bg-mirage p-6 text-left shadow-[0_1px_2px_rgba(0,0,0,0.28)] hover:border-wedgewood"
     >
       {/* 배지 줄: 난이도(accent) + 유형(neutral) */}

@@ -108,7 +108,7 @@ export default function PaymentPage() {
         <button
           type="button"
           className="h-11 w-full cursor-pointer text-[13.5px] font-medium text-santas-gray"
-          onClick={() => (window.location.href = '/pricing')}
+          onClick={() => navigate('/pricing')}
         >
           취소하고 돌아가기
         </button>

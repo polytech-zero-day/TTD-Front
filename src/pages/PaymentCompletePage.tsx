@@ -80,14 +80,14 @@ export default function PaymentCompletePage() {
           <Button
             variant="primary"
             size="lg"
-            onClick={() => (window.location.href = '/mypage')}
+            onClick={() => navigate('/mypage')}
           >
             마이페이지에서 구독 확인
           </Button>
           <Button
             variant="outline"
             size="lg"
-            onClick={() => (window.location.href = '/problems')}
+            onClick={() => navigate('/problems')}
           >
             문제 풀러 가기
           </Button>

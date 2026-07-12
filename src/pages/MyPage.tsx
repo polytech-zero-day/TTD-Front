@@ -272,7 +272,7 @@ export default function MyPage() {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => (window.location.href = '/pricing')}
+            onClick={() => navigate('/pricing')}
           >
             요금제 보기
           </Button>
@@ -436,7 +436,7 @@ export default function MyPage() {
             <Button
               variant="primary"
               size="lg"
-              onClick={() => (window.location.href = '/pricing')}
+              onClick={() => navigate('/pricing')}
             >
               업그레이드
             </Button>
