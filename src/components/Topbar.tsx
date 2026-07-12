@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Avatar from './ui/Avatar';
 import Badge from './ui/Badge';
@@ -31,36 +31,54 @@ export default function Topbar({ active }: TopbarProps) {
   // 계정 카드 팝업 — 이메일·통계는 카드가 처음 열릴 때 lazy fetch 후 캐시한다.
   // Topbar는 모든 페이지에 렌더링되므로 페이지 로드마다 요청을 발생시키지 않는다.
   const accountRef = useRef<HTMLDivElement>(null);
+  const cardLoadInFlightRef = useRef(false);
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [profileEmail, setProfileEmail] = useState<string | null>(null);
   const [stats, setStats] = useState<MyAttemptStats | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(false);
 
-  async function ensureCardData() {
-    if (profileEmail !== null && stats !== null) return; // 캐시 히트
-    setIsLoadingCard(true);
-    try {
-      const tasks: Promise<void>[] = [];
-      if (profileEmail === null) {
-        tasks.push(fetchMyProfile().then((p) => setProfileEmail(p.email)));
-      }
-      if (stats === null) {
-        tasks.push(fetchMyStats().then((s) => setStats(s)));
-      }
-      await Promise.all(tasks);
-    } catch {
-      // 실패 시 캐시하지 않음 — 다음 열림 때 재시도된다
-    } finally {
-      setIsLoadingCard(false);
+  // 상태 업데이터는 순수하게 유지하고, 실제 데이터 조회는 열린 상태 변화에 반응해 실행한다.
+  // React 개발 모드의 업데이터 재실행으로 중복 요청이 나는 것을 막는다.
+  useEffect(() => {
+    if (
+      !isCardOpen ||
+      cardLoadInFlightRef.current ||
+      (profileEmail !== null && stats !== null)
+    ) {
+      return;
     }
-  }
+
+    let cancelled = false;
+    cardLoadInFlightRef.current = true;
+    setIsLoadingCard(true);
+
+    void Promise.all([
+      profileEmail === null
+        ? fetchMyProfile().then((profile) => {
+            if (!cancelled) setProfileEmail(profile.email);
+          })
+        : Promise.resolve(),
+      stats === null
+        ? fetchMyStats().then((nextStats) => {
+            if (!cancelled) setStats(nextStats);
+          })
+        : Promise.resolve(),
+    ])
+      .catch(() => {
+        // 실패 시 캐시하지 않음 — 다음 열림 때 재시도된다.
+      })
+      .finally(() => {
+        cardLoadInFlightRef.current = false;
+        if (!cancelled) setIsLoadingCard(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCardOpen, profileEmail, stats]);
 
   function toggleCard() {
-    setIsCardOpen((prev) => {
-      const next = !prev;
-      if (next) void ensureCardData();
-      return next;
-    });
+    setIsCardOpen((prev) => !prev);
   }
 
   // 바깥 클릭·ESC로 카드 닫기
@@ -94,18 +112,18 @@ export default function Topbar({ active }: TopbarProps) {
 
   return (
     <header className="flex h-[60px] items-center bg-mirage px-6 font-sans">
-      <a href="/" className="mr-10 flex items-center gap-2 no-underline">
+      <Link to="/" className="mr-10 flex items-center gap-2 no-underline">
         <span className="h-[9px] w-[9px] rounded-sm bg-wedgewood" />
         <span className="text-base font-bold tracking-[-0.16px] text-gallery">
           TTD
         </span>
-      </a>
+      </Link>
 
       <nav className="flex items-center gap-0.5">
         {NAV_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.key}
-            href={item.path}
+            to={item.path}
             className={`rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap no-underline ${
               active === item.key
                 ? 'bg-biscay text-gallery'
@@ -113,7 +131,7 @@ export default function Topbar({ active }: TopbarProps) {
             }`}
           >
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
 
@@ -129,9 +147,9 @@ export default function Topbar({ active }: TopbarProps) {
         )}
         {isLoggedIn ? (
           <>
-            <a href="/pricing" className="no-underline">
+            <Link to="/pricing" className="no-underline">
               <Badge tone={plan === 'PAID' ? 'paid' : 'pill'}>{plan}</Badge>
-            </a>
+            </Link>
             <div ref={accountRef} className="relative">
               <button
                 type="button"

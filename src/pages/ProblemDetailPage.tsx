@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import Topbar from '../components/Topbar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -58,6 +58,7 @@ function ProblemDetail({
   isPaid: boolean;
   isLoggedIn: boolean;
 }) {
+  const navigate = useNavigate();
   const {
     id,
     title,
@@ -100,12 +101,12 @@ function ProblemDetail({
   return (
     <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
       {/* 뒤로가기 */}
-      <a
-        href="/problems"
+      <Link
+        to="/problems"
         className="text-sm text-santas-gray no-underline hover:text-gallery"
       >
         ← 문제 카탈로그
-      </a>
+      </Link>
 
       {/* 상세 패널 */}
       <div className="flex flex-col gap-6 rounded-xl border border-gallery-9 bg-mirage p-8 shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
@@ -173,9 +174,7 @@ function ProblemDetail({
             // S-04(C파트) 응시 화면 라우트 연결 예정. 현재는 해당 라우트가 없어
             // 클릭 시 빈 화면이 나오는 것이 정상이며, S-04 완성 시 자연스럽게 연결됨.
             onClick={() => {
-              window.location.href = isLoggedIn
-                ? `/problems/${id}/attempt`
-                : '/login';
+              navigate(isLoggedIn ? `/problems/${id}/attempt` : '/login');
             }}
           >
             {attemptMeta?.action ??
@@ -197,14 +196,15 @@ function ProblemDetail({
 
 // 없는 문제 id 처리 (PROBLEM_NOT_FOUND).
 function NotFound() {
+  const navigate = useNavigate();
   return (
     <main className="mx-auto flex w-full max-w-[880px] flex-col gap-5 px-5 pt-8 pb-20">
-      <a
-        href="/problems"
+      <Link
+        to="/problems"
         className="text-sm text-santas-gray no-underline hover:text-gallery"
       >
         ← 문제 카탈로그
-      </a>
+      </Link>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-gallery-9 bg-mirage px-5 py-24 text-center shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
         <div className="text-base font-semibold text-gallery">
           문제를 찾을 수 없어요
@@ -215,7 +215,7 @@ function NotFound() {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => (window.location.href = '/problems')}
+          onClick={() => navigate('/problems')}
         >
           목록으로
         </Button>
