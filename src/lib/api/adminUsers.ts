@@ -9,10 +9,6 @@ export function fetchAdminUsers() {
   return apiFetch<AdminUser[]>('/api/admin/users');
 }
 
-export function fetchAdminUser(id: number) {
-  return apiFetch<AdminUser>(`/api/admin/users/${id}`);
-}
-
 export function createAdminUser(input: CreateAdminUserInput) {
   return apiFetch<AdminUser>('/api/admin/users', {
     method: 'POST',
