@@ -19,7 +19,7 @@ export default function SubmitPanel({ state, onDraftChange, onSubmit }: Props) {
   const locked = state.phase === 'grading' || state.phase === 'failed';
   return (
     <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-gallery-9 px-5 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b border-gallery-9 px-5 py-3">
         <span className="text-sm font-semibold text-gallery">결과물 제출</span>
       </div>
 
