@@ -8,17 +8,17 @@
 
 ## 기술 스택
 
-| 구분 | 사용 기술 |
-|---|---|
-| Language | TypeScript 6 |
-| UI | React 19, Tailwind CSS 4 |
-| 빌드 | Vite 8 |
-| 라우팅 | React Router 7 |
-| 결제 | PortOne Browser SDK (V2) |
+| 구분            | 사용 기술                                                                               |
+| --------------- | --------------------------------------------------------------------------------------- |
+| Language        | TypeScript 6                                                                            |
+| UI              | React 19, Tailwind CSS 4                                                                |
+| 빌드            | Vite 8                                                                                  |
+| 라우팅          | React Router 7                                                                          |
+| 결제            | PortOne Browser SDK (V2)                                                                |
 | 에디터/마크다운 | `@uiw/react-textarea-code-editor`, `react-markdown` + `remark-gfm` + `rehype-highlight` |
-| 레이아웃/UX | `react-resizable-panels`, `react-textarea-autosize`, `sonner`(토스트), `react-spinners` |
-| 테스트 | Vitest + Testing Library(단위/훅), Playwright(E2E) |
-| 품질 | ESLint, Prettier |
+| 레이아웃/UX     | `react-resizable-panels`, `react-textarea-autosize`, `sonner`(토스트), `react-spinners` |
+| 테스트          | Vitest + Testing Library(단위/훅), Playwright(E2E)                                      |
+| 품질            | ESLint, Prettier                                                                        |
 
 ---
 
@@ -61,21 +61,23 @@ src
 
 ## 라우트
 
-| 구분 | 경로 |
-|---|---|
-| 공개 | `/login`, `/signup`, `/`, `/problems`, `/problems/:id`, `/leaderboard`, `/pricing` |
-| 보호(로그인) | `/problems/:id/attempt`, `/result/:attemptId`, `/mypage`, `/payment`, `/payment/complete` |
-| 관리자 | `/admin` (index=대시보드), `/admin/users`, `/admin/problems`, `/admin/ai-models`, `/admin/calibration` |
+| 구분         | 경로                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------ |
+| 공개         | `/login`, `/signup`, `/`, `/problems`, `/problems/:id`, `/leaderboard`, `/pricing`                     |
+| 보호(로그인) | `/problems/:id/attempt`, `/result/:attemptId`, `/mypage`, `/payment`, `/payment/complete`              |
+| 관리자       | `/admin` (index=대시보드), `/admin/users`, `/admin/problems`, `/admin/ai-models`, `/admin/calibration` |
 
 ---
 
 ## 로컬 실행
 
 ### 사전 준비
+
 - Node.js 22+
 - 실행 중인 [TTD-Backend](../TTD-Backend) (기본 `http://localhost:8080`)
 
 ### 실행
+
 ```bash
 npm install
 npm run dev        # http://localhost:5173
@@ -87,14 +89,14 @@ npm run dev        # http://localhost:5173
 
 ## 스크립트
 
-| 명령 | 설명 |
-|---|---|
-| `npm run dev` | 개발 서버 |
-| `npm run build` | 타입체크(`tsc -b`) + 프로덕션 빌드 |
-| `npm run lint` | ESLint |
-| `npm run format:check` / `format` | Prettier 검사 / 자동 정렬 |
-| `npm test` | Vitest 단위·훅 테스트 |
-| `npm run test:e2e` | Playwright E2E |
+| 명령                              | 설명                               |
+| --------------------------------- | ---------------------------------- |
+| `npm run dev`                     | 개발 서버                          |
+| `npm run build`                   | 타입체크(`tsc -b`) + 프로덕션 빌드 |
+| `npm run lint`                    | ESLint                             |
+| `npm run format:check` / `format` | Prettier 검사 / 자동 정렬          |
+| `npm test`                        | Vitest 단위·훅 테스트              |
+| `npm run test:e2e`                | Playwright E2E                     |
 
 ---
 
@@ -110,9 +112,9 @@ npm run dev        # http://localhost:5173
 
 폴리텍 웹개발 프로젝트 — TTD(Text To Develop)
 
-| 파트 | 담당 | 영역 |
-|---|---|---|
-| A | 윤여훈 | 문제 도메인 |
-| B | 고윤 | 백오피스 · 인증 · 결제 |
-| C | 한성민 | 응시 · 실행 · 채점 |
-| D | 차윤희 | 리포트 · 리더보드 |
+| 파트 | 담당   | 영역                   |
+| ---- | ------ | ---------------------- |
+| A    | 윤여훈 | 문제 도메인            |
+| B    | 고윤   | 백오피스 · 인증 · 결제 |
+| C    | 한성민 | 응시 · 실행 · 채점     |
+| D    | 차윤희 | 리포트 · 리더보드      |
