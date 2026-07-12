@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import Topbar from '../components/Topbar';
 import Button from '../components/ui/Button';
-import { plans } from '../data/dummyPricing';
+import { plans } from '../data/pricingCatalog';
 import { ApiError } from '@/lib/api/client';
 import { subscribe } from '@/lib/api/subscription';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';

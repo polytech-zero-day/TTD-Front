@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import Topbar from '../components/Topbar';
 import Button from '../components/ui/Button';
-import { plans } from '../data/dummyPricing';
+import { plans } from '../data/pricingCatalog';
 import { getMySubscription } from '@/lib/api/subscription';
 import { formatDate } from '@/lib/format';
 import type { SubscriptionResponse } from '@/types/subscription';

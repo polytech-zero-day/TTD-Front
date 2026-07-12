@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import Topbar from '../components/Topbar';
 import PlanCard from '../components/feature/pricing/PlanCard';
-import { plans } from '../data/dummyPricing';
+import { plans } from '../data/pricingCatalog';
 import { getMySubscription } from '@/lib/api/subscription';
 import { isPaidSubscription } from '@/lib/subscription/plan';
 import { isAuthenticated } from '@/lib/auth/session';
