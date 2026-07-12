@@ -107,7 +107,7 @@ export default function AttemptPage() {
         chatModel={state.chatModel}
         onExit={() => navigate(`/problems/${problemId}`)}
       />
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,0.9fr)_minmax(520px,1.5fr)_minmax(300px,0.8fr)] overflow-hidden">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(200px,0.9fr)_minmax(300px,1.5fr)_minmax(200px,0.8fr)] overflow-hidden">
         <ProblemPanel problem={problem} />
         <ChatPanel
           state={state}
