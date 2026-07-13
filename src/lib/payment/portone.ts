@@ -8,8 +8,23 @@ const CHANNEL_KEY = import.meta.env.VITE_PORTONE_CHANNEL_KEY;
 // 폴백해 데모가 항상 성공하도록 한다. 백엔드도 app.payment.mock-enabled로 승인을 성공 처리한다.
 export const PAYMENT_MOCK = import.meta.env.VITE_PAYMENT_MOCK === 'true';
 
-const mockBillingKey = () => `mock-billing-${crypto.randomUUID()}`;
-const f117DemoBillingKey = () => `demo-f117-billing-${crypto.randomUUID()}`;
+/**
+ * S3 정적 웹 사이트의 HTTP 접속 환경은 secure context가 아니어서
+ * crypto.randomUUID()를 제공하지 않을 수 있다. 아래 식별자는 인증 토큰이 아니라
+ * PortOne 요청·데모 빌링키의 중복 방지용이므로, 해당 환경에서는 시간·난수 조합으로 대체한다.
+ */
+const createRequestId = () => {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+};
+
+const mockBillingKey = () => `mock-billing-${createRequestId()}`;
+const f117DemoBillingKey = () => `demo-f117-billing-${createRequestId()}`;
 
 export class BillingKeyIssueError extends Error {}
 
@@ -47,7 +62,7 @@ export async function issueBillingKey(): Promise<string> {
       billingKeyMethod: 'CARD',
       issueName: 'TTD PAID 플랜 정기결제',
       // 나이스페이 V2는 빌링키 발급 시 주문 번호(issueId)가 필수라 매 요청마다 새로 생성한다.
-      issueId: `ttd-billing-${Date.now()}-${crypto.randomUUID()}`,
+      issueId: `ttd-billing-${createRequestId()}`,
     });
 
     if (response && !response.code && response.billingKey) {
