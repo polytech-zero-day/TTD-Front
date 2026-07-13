@@ -375,7 +375,7 @@ export default function MyPage() {
                       <th className="sticky top-0 bg-mirage px-3.5 py-3 text-right text-xs font-semibold tracking-[0.46px] text-santas-gray uppercase">
                         효율
                       </th>
-                      <th className="sticky top-0 bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] whitespace-nowrap min-w-[64px] text-santas-gray uppercase">
+                      <th className="sticky top-0 min-w-[64px] bg-mirage px-3.5 py-3 text-left text-xs font-semibold tracking-[0.46px] whitespace-nowrap text-santas-gray uppercase">
                         상태
                       </th>
                     </tr>
