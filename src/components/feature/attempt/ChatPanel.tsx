@@ -9,6 +9,7 @@ import { BarLoader } from 'react-spinners';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import { toast } from 'sonner';
 import 'highlight.js/styles/github-dark.css';
 
 interface Props {
@@ -293,6 +294,34 @@ function MessageContent({ content }: { content: string }) {
   );
 }
 
+function copyWithLegacyClipboard(text: string) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  const copied = document.execCommand('copy');
+  textarea.remove();
+  return copied;
+}
+
+async function copyText(text: string) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // 권한이 거부된 경우에도 HTTP 환경용 폴백을 시도한다.
+    }
+  }
+
+  return copyWithLegacyClipboard(text);
+}
+
 // 코드 블록 + 우상단 복사 버튼 (hover 시 노출, 복사 후 1.5초간 체크 표시)
 function CodeBlock(props: ComponentPropsWithoutRef<'pre'>) {
   const preRef = useRef<HTMLPreElement>(null);
@@ -300,12 +329,13 @@ function CodeBlock(props: ComponentPropsWithoutRef<'pre'>) {
 
   async function copy() {
     const text = preRef.current?.innerText ?? '';
-    try {
-      await navigator.clipboard.writeText(text);
+    if (!text) return;
+
+    if (await copyText(text)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* 클립보드 권한 거부 시 무시 */
+    } else {
+      toast.error('코드를 복사하지 못했습니다. 직접 선택해 복사해주세요.');
     }
   }
 
