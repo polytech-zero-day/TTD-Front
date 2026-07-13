@@ -48,33 +48,26 @@ export default function Topbar({ active }: TopbarProps) {
       return;
     }
 
-    let cancelled = false;
     cardLoadInFlightRef.current = true;
     setIsLoadingCard(true);
 
     void Promise.all([
-      profileEmail === null
-        ? fetchMyProfile().then((profile) => {
-            if (!cancelled) setProfileEmail(profile.email);
-          })
-        : Promise.resolve(),
-      stats === null
-        ? fetchMyStats().then((nextStats) => {
-            if (!cancelled) setStats(nextStats);
-          })
-        : Promise.resolve(),
+      profileEmail === null ? fetchMyProfile() : Promise.resolve(null),
+      stats === null ? fetchMyStats() : Promise.resolve(null),
     ])
+      .then(([profile, nextStats]) => {
+        // 두 요청을 모두 마친 뒤 함께 반영해야 한쪽 상태 변경으로 effect가
+        // 정리되면서 나머지 응답과 로딩 종료가 무시되는 경쟁 상태가 생기지 않는다.
+        if (profile) setProfileEmail(profile.email);
+        if (nextStats) setStats(nextStats);
+      })
       .catch(() => {
         // 실패 시 캐시하지 않음 — 다음 열림 때 재시도된다.
       })
       .finally(() => {
         cardLoadInFlightRef.current = false;
-        if (!cancelled) setIsLoadingCard(false);
+        setIsLoadingCard(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [isCardOpen, profileEmail, stats]);
 
   function toggleCard() {
