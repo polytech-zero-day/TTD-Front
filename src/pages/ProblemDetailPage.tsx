@@ -185,7 +185,7 @@ function ProblemDetail({
               (isPaid
                 ? 'PAID 플랜은 문제·프롬프트 횟수 제한 없이 응시할 수 있습니다.'
                 : isLoggedIn
-                  ? `최대 ${maxAttempts}회 응시 가능 · 문제당 프롬프트 3회 제한`
+                  ? `최대 ${maxAttempts}회 응시 가능 · 문제당 프롬프트 10회 제한`
                   : '응시를 시작하려면 로그인해주세요.')}
           </span>
         </div>
