@@ -101,40 +101,42 @@ export default function AttemptPage() {
   }
 
   return (
-    <div className="mx-auto flex h-screen w-full max-w-[1920px] flex-col bg-ebony font-sans">
-      <AttemptTopbar
-        usage={state.usage}
-        remainingSeconds={state.remainingSeconds}
-        chatModel={state.chatModel}
-        onExit={() => navigate(`/problems/${problemId}`)}
-      />
-      <PanelGroup
-        direction="horizontal"
-        autoSaveId="attempt-panel-layout"
-        className="min-h-0 flex-1 overflow-hidden"
-      >
-        <Panel defaultSize={28} minSize={15}>
-          <ProblemPanel problem={problem} />
-        </Panel>
-        <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
-        <Panel defaultSize={47} minSize={22}>
-          <ChatPanel
-            state={state}
-            onSend={send}
-            onCancelConfirm={cancelConfirm}
-            onConfirmSubmit={confirmSubmit}
-            onRegrade={retryGrading}
-          />
-        </Panel>
-        <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
-        <Panel defaultSize={25} minSize={15}>
-          <SubmitPanel
-            state={state}
-            onDraftChange={setDraft}
-            onSubmit={openConfirm}
-          />
-        </Panel>
-      </PanelGroup>
+    <div className="min-h-screen w-full bg-ebony font-sans">
+      <div className="mx-auto flex h-screen w-full max-w-[1920px] flex-col">
+        <AttemptTopbar
+          usage={state.usage}
+          remainingSeconds={state.remainingSeconds}
+          chatModel={state.chatModel}
+          onExit={() => navigate(`/problems/${problemId}`)}
+        />
+        <PanelGroup
+          direction="horizontal"
+          autoSaveId="attempt-panel-layout"
+          className="min-h-0 flex-1 overflow-hidden"
+        >
+          <Panel defaultSize={28} minSize={15}>
+            <ProblemPanel problem={problem} />
+          </Panel>
+          <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
+          <Panel defaultSize={47} minSize={22}>
+            <ChatPanel
+              state={state}
+              onSend={send}
+              onCancelConfirm={cancelConfirm}
+              onConfirmSubmit={confirmSubmit}
+              onRegrade={retryGrading}
+            />
+          </Panel>
+          <PanelResizeHandle className="w-1 cursor-col-resize bg-gallery-9 transition-colors hover:bg-wedgewood data-[resize-handle-state=drag]:bg-wedgewood" />
+          <Panel defaultSize={25} minSize={15}>
+            <SubmitPanel
+              state={state}
+              onDraftChange={setDraft}
+              onSubmit={openConfirm}
+            />
+          </Panel>
+        </PanelGroup>
+      </div>
       {plan === 'PAID' && !startRequested && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5">
           <section

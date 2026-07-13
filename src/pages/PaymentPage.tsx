@@ -40,7 +40,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="pricing" />
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-2 px-5 pt-[62px] pb-20">

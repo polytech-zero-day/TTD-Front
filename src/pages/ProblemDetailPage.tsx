@@ -278,7 +278,7 @@ export default function ProblemDetailPage() {
   }, [currentAttempt?.status, currentAttempt?.remainingSeconds]);
 
   return (
-    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="catalog" />
       {notFound ? (
         <NotFound />

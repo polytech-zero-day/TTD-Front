@@ -106,7 +106,7 @@ export default function Leaderboard() {
 
   if (!ready) {
     return (
-      <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+      <div className="min-h-screen w-full bg-ebony font-sans">
         <Topbar active="leaderboard" />
         <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">
           <p className="text-[13px] text-santas-gray">불러오는 중…</p>
@@ -149,7 +149,7 @@ export default function Leaderboard() {
   );
 
   return (
-    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="leaderboard" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-5 px-10 pt-8 pb-20">

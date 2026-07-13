@@ -76,7 +76,7 @@ export default function ProblemListPage() {
   }, [problems, level, typeLabel]);
 
   return (
-    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="catalog" />
 
       <main className="mx-auto flex w-full max-w-[1160px] flex-col gap-6 px-5 pt-8 pb-20">

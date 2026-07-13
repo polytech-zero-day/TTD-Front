@@ -30,7 +30,7 @@ export default function PricingPage() {
   }, [isLoggedIn]);
 
   return (
-    <div className="mx-auto min-h-[1200px] w-full max-w-[1920px] bg-ebony font-sans">
+    <div className="min-h-screen w-full bg-ebony font-sans">
       <Topbar active="pricing" />
 
       <main className="mx-auto flex w-full max-w-[820px] flex-col items-center gap-[26px] px-5 pt-[42px] pb-20">
