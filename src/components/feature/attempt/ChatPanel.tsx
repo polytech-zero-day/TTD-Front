@@ -138,11 +138,17 @@ export default function ChatPanel({
               <div className="flex-1 rounded-lg bg-ebony px-3.5 py-2.5">
                 <div className="text-[11px] text-santas-gray">사용 메시지</div>
                 <div className="text-lg font-bold text-gallery">
-                  {usage.messagesUsed}
-                  <span className="text-xs font-normal text-santas-gray">
-                    {' '}
-                    / {usage.unlimited ? '무제한' : `${usage.messagesLimit}회`}
-                  </span>
+                  {usage.unlimited ? (
+                    '무제한'
+                  ) : (
+                    <>
+                      {usage.messagesUsed}
+                      <span className="text-xs font-normal text-santas-gray">
+                        {' '}
+                        / {usage.messagesLimit}회
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex-1 rounded-lg bg-ebony px-3.5 py-2.5">
@@ -175,15 +181,16 @@ export default function ChatPanel({
       <div className="shrink-0 border-t border-gallery-9 px-5 py-3">
         <div className="mb-2.5 flex items-center gap-3 text-xs text-santas-gray">
           <span>
-            메시지 {usage.messagesUsed}/
-            {usage.unlimited ? '무제한' : usage.messagesLimit}
+            {usage.unlimited
+              ? '메시지 무제한'
+              : `메시지 ${usage.messagesUsed} / ${usage.messagesLimit}`}
           </span>
-          <UsageBar
-            ratio={
-              usage.unlimited ? 0 : usage.messagesUsed / usage.messagesLimit
-            }
-            danger={exhausted}
-          />
+          {!usage.unlimited && (
+            <UsageBar
+              ratio={usage.messagesUsed / usage.messagesLimit}
+              danger={exhausted}
+            />
+          )}
           <span>
             누적 토큰 {usage.tokensUsed.toLocaleString()} / 적정{' '}
             {usage.tokensBaseline.toLocaleString()}
