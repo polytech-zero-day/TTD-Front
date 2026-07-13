@@ -9,8 +9,8 @@ export const fetchMySubscription = () =>
 export async function getMySubscription(): Promise<SubscriptionResponse | null> {
   try {
     return await fetchMySubscription();
-  } catch (err) {
-    console.error('[subscription] failed to load current subscription', err);
+  } catch {
+    // FREE 사용자의 구독 없음은 정상 상태이므로 null로 정규화한다.
     return null;
   }
 }
