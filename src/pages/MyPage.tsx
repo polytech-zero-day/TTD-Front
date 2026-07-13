@@ -330,7 +330,7 @@ export default function MyPage() {
         </section>
 
         {/* 산점도 + 제출 이력 */}
-        <section className="flex items-stretch gap-5">
+        <section className="flex items-start gap-5">
           <div className="min-w-0 flex-1 rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
             <div className="flex items-center p-5">
               <div>
@@ -347,7 +347,7 @@ export default function MyPage() {
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-[1.3] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
+          <div className="flex max-h-[460px] min-w-0 flex-[1.3] flex-col overflow-hidden rounded-xl border border-gallery-9 bg-mirage shadow-[0_1px_2px_rgba(0,0,0,0.28)]">
             <div className="flex items-center justify-between p-5">
               <div className="text-lg font-semibold text-gallery">
                 제출 이력
