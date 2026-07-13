@@ -94,10 +94,6 @@ export default function MyPage() {
   }
 
   const { profile, attempts, stats, scatter } = data;
-  // 화면에 표시할 최근 응시 이력만 잘라낸다.
-  // 통계(distinctProblems)·최근 응시일(lastAttemptAt) 계산은 아래에서 전체 attempts 기준으로 유지.
-  const RECENT_ATTEMPTS_LIMIT = 20;
-  const recentAttempts = attempts.slice(0, RECENT_ATTEMPTS_LIMIT);
 
   function startEditNickname() {
     setNicknameDraft(profile.nickname);
@@ -356,7 +352,7 @@ export default function MyPage() {
               <div className="text-lg font-semibold text-gallery">
                 제출 이력
               </div>
-              <Badge tone="neutral">최근 {recentAttempts.length}건</Badge>
+              <Badge tone="neutral">최근 {attempts.length}건</Badge>
             </div>
             <div className="scrollbar-themed min-h-0 flex-1 overflow-y-auto px-5 pb-5">
               {attempts.length === 0 ? (
@@ -385,7 +381,7 @@ export default function MyPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentAttempts.map((item) => (
+                    {attempts.map((item) => (
                       <tr
                         key={item.attemptId}
                         className="hover:bg-white/[0.02]"
