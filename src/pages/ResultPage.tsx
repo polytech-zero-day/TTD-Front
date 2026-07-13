@@ -146,6 +146,40 @@ export default function ResultPage() {
     );
   }
 
+  const confidenceMeta = result.gradingConfidence
+    ? {
+        HIGH: {
+          label: '높음',
+          description:
+            '채점 구조 검증을 통과했으며 뚜렷한 조작 신호가 없습니다.',
+          style: 'border-emerald-400/30 bg-emerald-400/[0.08] text-emerald-300',
+        },
+        MEDIUM: {
+          label: '보통',
+          description:
+            '응시 과정에 제한 평가 요소가 있어 점수 근거를 함께 확인하세요.',
+          style: 'border-amber-400/30 bg-amber-400/[0.08] text-amber-300',
+        },
+        LOW: {
+          label: '낮음',
+          description:
+            '채점 조작 가능성이 있는 신호가 감지되어 결과를 주의해서 해석해야 합니다.',
+          style: 'border-red-400/30 bg-red-400/[0.08] text-red-300',
+        },
+      }[result.gradingConfidence]
+    : null;
+  const gradingFlagMessages: Record<string, string> = {
+    LOW_ENGAGEMENT_COPY:
+      '문제 원문 중심의 단일 요청으로 판단되어 AI 활용 과정 점수 상한이 적용되었습니다.',
+    POSSIBLE_GRADING_INJECTION:
+      '답안 또는 대화에서 채점 기준을 조작하려는 것으로 해석될 수 있는 문구가 감지되었습니다.',
+    NO_AI_INTERACTION:
+      'AI 대화 이력이 없어 AI 활용 과정 점수는 0점으로 제한되었습니다.',
+  };
+  const gradingWarnings = (result.gradingFlags ?? []).map(
+    (flag) => gradingFlagMessages[flag] ?? flag
+  );
+
   const referenceNotes = [
     `품질 점수: 루브릭 ${result.criteria.length}개 항목 채점 합산`,
     `효율성 점수: 적정 토큰 ${result.tokenBudget.toLocaleString()} 대비 사용량(${result.totalTokens.toLocaleString()}) 기반`,
@@ -203,6 +237,28 @@ export default function ResultPage() {
             )}
           </div>
         </header>
+
+        {confidenceMeta && (
+          <section
+            className={`flex flex-col gap-2 rounded-xl border px-5 py-4 ${confidenceMeta.style}`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold">
+                채점 신뢰도 {confidenceMeta.label}
+              </span>
+              <span className="text-xs opacity-80">
+                {confidenceMeta.description}
+              </span>
+            </div>
+            {gradingWarnings.length > 0 && (
+              <ul className="flex flex-col gap-1 text-xs opacity-90">
+                {gradingWarnings.map((warning) => (
+                  <li key={warning}>• {warning}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         {/* ② 채점 총평 (독립 전폭) */}
         <section className="flex flex-col gap-5 rounded-xl border border-gallery-9 bg-mirage p-[25px]">

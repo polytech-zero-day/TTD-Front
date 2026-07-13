@@ -44,6 +44,8 @@ export interface AttemptResult {
   artifact: string | null; // 사용자의 최종 제출 답변 (draft 확정본)
   premium: boolean; // 유료 응시 여부
   chatModel: string | null; // 이 응시가 사용한 AI 모델
+  gradingConfidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+  gradingFlags?: string[];
 }
 
 // 시작 (진행 중 세션이 있으면 서버가 그 스냅샷을 그대로 반환 — 멱등)
